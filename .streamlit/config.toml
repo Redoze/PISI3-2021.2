@@ -1,11 +1,9 @@
 [server]
 port = 80
-
 maxMessageSize = 2000
 
-
 [theme]
-primaryColor="#56CDCC"
+primaryColor="#2AB6B0"
 backgroundColor="#0C131B"
 secondaryBackgroundColor="#162939"
 textColor="#FFFFFF"
