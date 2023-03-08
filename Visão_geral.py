@@ -9,9 +9,6 @@ from wordcloud import WordCloud
 import altair as alt
 from funcs import *
 
-#cd 'C:\Users\josef\Desktop\Projeto 3'
-#streamlit run Visão_geral.py --server.port 80
-
 st.set_page_config(
     page_title="Análise de sentimentos em avaliações de jogos na Steam",
     page_icon="✅",
