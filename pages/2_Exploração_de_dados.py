@@ -8,12 +8,14 @@ import plotly.express as px
 from funcs import *
  
 st.set_page_config(
-    page_title="Filtragem",
+    page_title="Exploração de dados",
     page_icon="🔎",
     layout="wide",
 )
 
 df = load_csv()
+df_tags = load_csv2()
+df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["appid", "name"])
 
 st.title("Explorando os dados dos jogos")
 st.markdown("---")
@@ -102,4 +104,4 @@ else:
         height=600)
         st.plotly_chart(pizza_chart)
         st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
-                
+
