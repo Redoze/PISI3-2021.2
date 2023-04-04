@@ -9,6 +9,8 @@ from wordcloud import WordCloud
 import altair as alt
 from funcs import *
 
+
+
 st.set_page_config(
     page_title="Análise de sentimentos em avaliações de jogos na Steam",
     page_icon="✅",
@@ -16,7 +18,8 @@ st.set_page_config(
 )
 
 df = load_csv()
-
+df_tags = load_csv2()
+df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["appid", "name"])
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 st.title("Análise de sentimentos em avaliações de jogos na Steam")
@@ -31,7 +34,7 @@ if ocultar_df:
 else:
     st.header('Visão geral do conjunto de dados')
     st.text("")
-    st.dataframe(df)
+    st.dataframe(df_merged)
     st.caption('review_score:  1 = review positiva, review_score: -1 = review negativa, review_votes:  1 = review recomendada, review_votes:  0 = review sem recomendação ou negativada')
     st.text("")
 
@@ -95,3 +98,4 @@ elif selected_chart == "Gráfico de pizza de distribuição de sentimentos":
     height=600)
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
+
