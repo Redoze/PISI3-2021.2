@@ -47,13 +47,15 @@ clf.fit(X_train_vect, y_train)
 #fazendo a avaliacao do modelo
 accuracy = clf.score(X_test_vect, y_test)
 
-
+#dando dados do naive bayes para uma coluna no dataframe
+df_merged['predicted_sentiment'] = clf.predict(vectorizer.transform(df_merged['review_text']))
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -DASHBOARD-  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 st.sidebar.header("Filtrar por jogo")
 selected_game = st.sidebar.selectbox("Selecione um jogo", sorted(df_merged["app_name"].unique()))
 #filtrar o dataset baseado no jogo selecionado
 df_filtered = df_merged[df_merged["app_name"] == selected_game]
+
 #mostra algumas informações sobre o jogo
 st.header(selected_game)
 st.write("Numero total de reviews: ", len(df_filtered))
@@ -61,7 +63,7 @@ st.write("Pontuação média das reviews: ", round(df_filtered["review_score"].m
 st.write("Percentual de reviews positivas: ", round(df_filtered["sentiment"].mean() * 100, 2), "%")
 
 st.subheader("Histograma das labels de sentimento")
-fig = px.histogram(df_filtered, x="sentiment", nbins=2)
+fig = px.histogram(df_filtered, x="predicted_sentiment", nbins=2)
 st.plotly_chart(fig)
 
 #matriz de confusão do naive bayes
@@ -85,8 +87,8 @@ positive_features = [feature_names[i] for i in np.argsort(coefs[0])[::-1][:100]]
 #ordena os nomes das features por seus coeficientes para sentimentos negativos
 negative_features = [feature_names[i] for i in np.argsort(coefs[0])[:100]]
 #criar o wordcloud pra reviews positivas e negativas
-positive_text = " ".join(df_filtered[df_filtered["sentiment"] == 1]["review_text"])
-negative_text = " ".join(df_filtered[df_filtered["sentiment"] == 0]["review_text"])
+positive_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 1]["review_text"])
+negative_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 0]["review_text"])
 
 positive_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(positive_text)
 negative_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(negative_text)
