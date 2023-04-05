@@ -27,9 +27,10 @@ st.title("Exploração de dados apartir da análise de sentimentos")
 st.markdown("---")
 st.sidebar.subheader("Use os filtros para exploração de dados:")
 
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -NAIVE BAYES-  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 df_merged["sentiment"] = df_merged["review_score"].apply(lambda x: 1 if x == 1 else 0)
+
 
 #seta os inputs e outputs para os modelos de teste e de treino
 X_train, X_test, y_train, y_test = train_test_split(df_merged["review_text"], df_merged["sentiment"], test_size=0.2, random_state=42)
@@ -58,11 +59,7 @@ st.header(selected_game)
 st.write("Numero total de reviews: ", len(df_filtered))
 st.write("Pontuação média das reviews: ", round(df_filtered["review_score"].mean(), 2))
 st.write("Percentual de reviews positivas: ", round(df_filtered["sentiment"].mean() * 100, 2), "%")
-
-st.subheader("Histograma das pontuações de reviews")
-fig = px.histogram(df_filtered, x="sentiment", nbins=2)
-st.plotly_chart(fig)
-
+st.write(clf)
 st.subheader("Histograma das labels de sentimento")
 fig = px.histogram(df_filtered, x="sentiment", nbins=2)
 st.plotly_chart(fig)
@@ -99,16 +96,3 @@ st.image(positive_wordcloud.to_image())
 
 st.subheader("Word cloud de reviews negativas")
 st.image(negative_wordcloud.to_image())
-
-#heatmap de correlacao (TA BUGADO, NAO TA FAZENDO AS CORRELACOES DIREITO)
-cols_to_include = ["sentiment", "price", "average_playtime", "owners", "positive_ratings", "negative_ratings"]
-#criar um dataframe novo para as cols selecionadas
-df_selected = df_filtered[cols_to_include]
-#computando a matriz
-corr_matrix = df_selected.corr()
-#gerando o heatmap 
-fig, ax = plt.subplots(figsize=(10,10))
-sns.heatmap(corr_matrix, annot=True, cmap='coolwarm')
-ax.set_title('Correlation Heatmap')
-st.pyplot(fig)
-
