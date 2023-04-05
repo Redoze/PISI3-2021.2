@@ -59,7 +59,7 @@ st.header(selected_game)
 st.write("Numero total de reviews: ", len(df_filtered))
 st.write("Pontuação média das reviews: ", round(df_filtered["review_score"].mean(), 2))
 st.write("Percentual de reviews positivas: ", round(df_filtered["sentiment"].mean() * 100, 2), "%")
-st.write(clf)
+
 st.subheader("Histograma das labels de sentimento")
 fig = px.histogram(df_filtered, x="sentiment", nbins=2)
 st.plotly_chart(fig)
