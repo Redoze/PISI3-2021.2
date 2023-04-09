@@ -1,3 +1,4 @@
+pip>=23.0.1
 numpy>=1.22.3
 pandas>=1.4.2
 plotly>=5.7.0
@@ -8,3 +9,5 @@ toml>=0.10.2
 xlrd>=2.0.1
 openpyxl>=3.0.9
 wordcloud>=1.8.2.2
+altair>=4.2.0
+scikit-learn>=1.2.1
