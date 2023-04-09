@@ -1,5 +1,4 @@
 [server]
-port = 8080
 maxMessageSize = 2000
 
 [theme]
