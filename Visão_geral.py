@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import matplotlib.pyplot as plt
 import streamlit as st
 import random as rn
 from wordcloud import WordCloud
