@@ -1,9 +1,8 @@
 import streamlit as st
 import pandas as pd
 
-# Load data
 @st.cache_resource
-def load_data():
+def load_csv():
     url = "https://www.dropbox.com/s/6ba1n1kaiwv8ea3/Dataset_limpo.csv?raw=1"
     try:
         df = pd.read_csv(url)
