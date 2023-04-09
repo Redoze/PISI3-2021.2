@@ -7,3 +7,4 @@ streamlit>=1.8.1
 toml>=0.10.2
 xlrd>=2.0.1
 openpyxl>=3.0.9
+wordcloud>=1.8.2.2
