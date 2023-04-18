@@ -9,6 +9,7 @@ import seaborn as sns
 from funcs import *
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
@@ -40,8 +41,13 @@ vectorizer = CountVectorizer(stop_words="english")
 X_train_vect = vectorizer.fit_transform(X_train)
 X_test_vect = vectorizer.transform(X_test)
 
+model_choice = st.sidebar.selectbox("Select a model", ["Naive Bayes", "Random Forest"])
+if model_choice == "Naive Bayes":
+    clf = MultinomialNB()
+elif model_choice == "Random Forest":
+    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    
 #treinando o Naive Bayes
-clf = MultinomialNB()
 clf.fit(X_train_vect, y_train)
 
 #fazendo a avaliacao do modelo
@@ -79,7 +85,7 @@ st.pyplot(fig3)
 st.write("Precisão do modelo:", accuracy)
 
 #pega os coeficientes das features dentro do modelo
-coefs = clf.feature_log_prob_
+coefs = clf.feature_importances_ if model_choice == "Random Forest" else clf.feature_log_prob_
 #pega o nome das features pelo vetorizador
 feature_names = vectorizer.get_feature_names_out()
 #ordena os nomes das features por seus coeficientes para sentimentos positivos
@@ -98,3 +104,20 @@ st.image(positive_wordcloud.to_image())
 
 st.subheader("Word cloud de reviews negativas")
 st.image(negative_wordcloud.to_image())
+
+#correlation heatmap
+#cols_to_include = ["average_playtime", "review_score", "review_votes"]
+#df_selected = df_filtered[cols_to_include]
+#corr_matrix = df_selected.corr()
+
+# Set up the mask to hide the upper triangle
+#mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+
+# Set up the color map
+#cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+# Generate a heatmap of the correlation matrix
+#fig, ax = plt.subplots(figsize=(10,10))
+#sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap=cmap, vmin=-1, vmax=1, mask=mask, square=True, linewidths=.5, cbar_kws={"shrink": .5})
+#ax.set_title('Correlation Heatmap')
+#st.pyplot(fig)
