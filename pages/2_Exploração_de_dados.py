@@ -10,7 +10,7 @@ from funcs import *
 st.set_page_config(
     page_title="Exploração de dados",
     page_icon="🔎",
-    layout="wide",
+    layout="centered",
 )
 
 df = load_csv()
