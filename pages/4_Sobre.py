@@ -5,7 +5,7 @@ import webbrowser
 st.set_page_config(
     page_title="Sobre",
     page_icon="📄",
-    layout="wide",
+    layout="centered",
 )
 
 st.header('Sobre')
