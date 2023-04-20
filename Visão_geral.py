@@ -13,7 +13,7 @@ from funcs import *
 st.set_page_config(
     page_title="Análise de sentimentos em avaliações de jogos na Steam",
     page_icon="✅",
-    layout="wide",
+    layout="centered",
 )
 
 df = load_csv()
