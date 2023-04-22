@@ -25,6 +25,7 @@ def load_csv2():
         raise Exception(error_msg)
     return df_tags
 
+@st.cache_data
 def load_csv3(gameid):
     df_time = pd.read_csv("pages/PlayerCountHistory/{}.csv".format(gameid))
     return df_time
