@@ -16,7 +16,7 @@ from wordcloud import WordCloud
 st.set_page_config(
     page_title="Análise de sentimentos",
     page_icon="🔎",
-    layout="wide",
+    layout="centered",
 )
 
 df = load_csv()
