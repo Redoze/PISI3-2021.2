@@ -16,7 +16,7 @@ from wordcloud import WordCloud
 st.set_page_config(
     page_title="Análise de sentimentos",
     page_icon="🔎",
-    layout="centered",
+    layout="wide",
 )
 
 df = load_csv()
@@ -33,10 +33,10 @@ st.sidebar.subheader("Use os filtros para exploração de dados:")
 df_merged["sentiment"] = df_merged["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
 
-#seta os inputs e outputs para os modelos de teste e de treino
+#Seta os inputs e outputs para os modelos de teste e de treino
 X_train, X_test, y_train, y_test = train_test_split(df_merged["review_text"], df_merged["sentiment"], test_size=0.2, random_state=42)
 
-#vetorizando os dados de texto
+#Vetorizando os dados de texto
 vectorizer = CountVectorizer(stop_words="english")
 X_train_vect = vectorizer.fit_transform(X_train)
 X_test_vect = vectorizer.transform(X_test)
@@ -45,37 +45,38 @@ model_choice = st.sidebar.selectbox("Select a model", ["Naive Bayes", "Random Fo
 if model_choice == "Naive Bayes":
     clf = MultinomialNB()
 elif model_choice == "Random Forest":
-    clf = RandomForestClassifier(n_estimators=100, random_state=42)
+    clf = RandomForestClassifier(n_estimators=35, max_depth=8, random_state=42, criterion="gini")
     
-#treinando o Naive Bayes
+#Treinando o modelo
 clf.fit(X_train_vect, y_train)
 
-#fazendo a avaliacao do modelo
+#Fazendo a avaliacao do modelo
 accuracy = clf.score(X_test_vect, y_test)
 
-#dando dados do naive bayes para uma coluna no dataframe
+#Dando dados do naive bayes para uma coluna no dataframe
 df_merged['predicted_sentiment'] = clf.predict(vectorizer.transform(df_merged['review_text']))
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -DASHBOARD-  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 st.sidebar.header("Filtrar por jogo")
 selected_game = st.sidebar.selectbox("Selecione um jogo", sorted(df_merged["app_name"].unique()))
-#filtrar o dataset baseado no jogo selecionado
+#Filtrar o dataset baseado no jogo selecionado
 df_filtered = df_merged[df_merged["app_name"] == selected_game]
 
-#mostra algumas informações sobre o jogo
+#Mostra algumas informações sobre o jogo
 st.header(selected_game)
 st.write("Numero total de reviews: ", len(df_filtered))
 st.write("Pontuação média das reviews: ", round(df_filtered["review_score"].mean(), 2))
 st.write("Percentual de reviews positivas: ", round(df_filtered["sentiment"].mean() * 100, 2), "%")
 
-st.subheader("Histograma das labels de sentimento")
+st.subheader("Histograma das labels de sentimento:")
 fig = px.histogram(df_filtered, x="predicted_sentiment", nbins=2)
 st.plotly_chart(fig)
 
-#matriz de confusão do naive bayes
+#Matriz de confusão do naive bayes
+st.subheader("Matriz de confusão:")
 y_pred = clf.predict(X_test_vect)
-cm = pd.crosstab(y_test, y_pred, rownames=["Verdadeira"], colnames=["Previsão"])
-fig3, ax3 = plt.subplots()
+cm = pd.crosstab(y_test, y_pred, rownames=["Real"], colnames=["Previsto"])
+fig3, ax3 = plt.subplots(figsize=(5 ,5))
 sns.set(style="ticks", context="talk")
 plt.style.use("dark_background")
 sns.color_palette("flare", as_cmap=True)
@@ -84,18 +85,29 @@ st.pyplot(fig3)
 
 st.write("Precisão do modelo:", accuracy)
 
-#pega os coeficientes das features dentro do modelo
-coefs = clf.feature_importances_ if model_choice == "Random Forest" else clf.feature_log_prob_
-#pega o nome das features pelo vetorizador
+#Pega os coeficientes das features dentro do modelo
+if model_choice == "Random Forest":
+    coefs = clf.feature_importances_
+else:
+    coefs = clf.feature_log_prob_
+#Pega o nome das features pelo vetorizador
 feature_names = vectorizer.get_feature_names_out()
-#ordena os nomes das features por seus coeficientes para sentimentos positivos
-positive_features = [feature_names[i] for i in np.argsort(coefs[0])[::-1][:100]]
-#ordena os nomes das features por seus coeficientes para sentimentos negativos
-negative_features = [feature_names[i] for i in np.argsort(coefs[0])[:100]]
-#criar o wordcloud pra reviews positivas e negativas
+#Pega os labels de classe
+classes = clf.classes_
+#Pega o indice da classe negativa
+neg_index = np.where(classes == 0)[0][0]
+#Pega o indice da classe positiva
+pos_index = np.where(classes == 1)[0][0]
+#Extrai os atributos negativos
+negative_features = [feature_names[i] for i in np.argsort(coefs[neg_index])[:100]]
+#Extrai os atributos positivos
+positive_features = [feature_names[i] for i in np.argsort(coefs[pos_index])[::-1][:100]]
+
+
+#Criar o wordcloud pra reviews positivas e negativas
 positive_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 1]["review_text"])
 negative_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 0]["review_text"])
-
+st.write(len(positive_text))
 positive_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(positive_text)
 negative_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(negative_text)
 
@@ -105,19 +117,27 @@ st.image(positive_wordcloud.to_image())
 st.subheader("Word cloud de reviews negativas")
 st.image(negative_wordcloud.to_image())
 
-#correlation heatmap
-#cols_to_include = ["average_playtime", "review_score", "review_votes"]
-#df_selected = df_filtered[cols_to_include]
-#corr_matrix = df_selected.corr()
+try:
+    #Carrega os dados de contagem de jogadores para o jogo selecionado
+    gameid = df_filtered["appid"].iloc[0]
+    df_playercount = load_csv3(gameid)
+    
+    #Agrega os dados de contagem de jogadores por data (média por horas)
+    df_playercount['Time'] = pd.to_datetime(df_playercount['Time'])
+    df_playercount.set_index('Time', inplace=True)
+    daily_pc_df_tmp= df_playercount.resample('D').mean().reset_index()
+    
+except FileNotFoundError:
+    st.write(f"Sem dados de 'jogadores diários' encontrados para o jogo: {gameid}")
+else: 
+   #Plot da contagem média de jogadores diarios
+   st.subheader('Média de jogadores diários:')
+   fig_daily_pc = px.area(daily_pc_df_tmp, x='Time', y='Playercount')
+   st.plotly_chart(fig_daily_pc)
 
-# Set up the mask to hide the upper triangle
-#mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+   #Computa a pontuacao de sentimento geral para o jogo selecionado
+   overall_sentiment = df_filtered['predicted_sentiment'].mean()
+   
+   st.subheader("Sentimento geral previsto:")
+   st.write('A pontuação geral de sentimento prevista para ',selected_game,'é de:', round(overall_sentiment*100,2),'% vs a verdadeira pontuação das reviews de:',  round(df_filtered["sentiment"].mean() * 100, 2), "%")
 
-# Set up the color map
-#cmap = sns.diverging_palette(220, 10, as_cmap=True)
-
-# Generate a heatmap of the correlation matrix
-#fig, ax = plt.subplots(figsize=(10,10))
-#sns.heatmap(corr_matrix, annot=True, fmt=".2f", cmap=cmap, vmin=-1, vmax=1, mask=mask, square=True, linewidths=.5, cbar_kws={"shrink": .5})
-#ax.set_title('Correlation Heatmap')
-#st.pyplot(fig)
