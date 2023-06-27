@@ -4,7 +4,7 @@ import random as rn
 
 @st.cache_resource
 def load_csv():
-    p = 0.15
+    p = 0.05
     url = "https://www.dropbox.com/s/fy4cffn16usarzk/Dataset_limpo.csv?raw=1"
     try:
         df = pd.read_csv(url, skiprows=lambda i: i>0 and rn.random() > p)
