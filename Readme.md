@@ -2,8 +2,8 @@
 
 ## Este programa consiste em realizar uma análise de sentimento sobre jogos na Steam utilizando a interface _web Streamlit_.
 
-###Documento: [PISI3 - Artigo](https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4)
-###Aplicativo em Streamlit Cloud: [pisi3-ggjjlm-2022-2](https://pisi3-ggjjlm-2022-2.streamlit.app/)
+##Documento: [PISI3 - Artigo](https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4)
+##Aplicativo em Streamlit Cloud: [pisi3-ggjjlm-2022-2](https://pisi3-ggjjlm-2022-2.streamlit.app/)
 
 Para executar localmente siga os passos abaixo:
 - Instale o python
