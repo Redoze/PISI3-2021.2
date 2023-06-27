@@ -12,12 +12,20 @@ st.header('Sobre')
 st.text("")
 st.markdown("---")
 st.text("")
-st.subheader('Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III')
-st.write('Grupo: #GJJ')
+st.subheader('Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III 2022.2')
+st.write('Grupo: #GGJJLM')
 st.text("")
-st.write('Participantes:')
-st.write('Gabriel Moreira de Lemos e Silva, José Fernando de Oliveira Filho e José Francisco de Medeiros')
-
+st.markdown(
+"""
+Participantes:
+- Gabriel Duarte da Silva
+- Gabriel Moreira de Lemos e Silva
+- José Fernando de Oliveira Filho
+- José Francisco de Medeiros
+- Leonardo de Sousa Araújo Alcântara
+- Marcos de Oliveira de Jesus
+"""
+)
 st.text("")
 url = 'https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4'
 
