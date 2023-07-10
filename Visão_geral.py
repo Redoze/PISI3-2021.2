@@ -70,7 +70,7 @@ if selected_chart == "Histograma de sentimentos":
             axis=alt.Axis(tickCount=2, values=[-1,1])),
     y='count()',
     color=alt.Color('review_score', legend=None,
-        scale=alt.Scale(domain=[Negativa,Positiva], range=['#FF4136', '#2ECC40']))
+        scale=alt.Scale(domain=["Negativa","Positiva"], range=['#FF4136', '#2ECC40']))
     ).properties(width=600, height=400)
     st.altair_chart(histograma_sentimentos)
     st.write("Representação gráfica da distribuição de sentimentos em reviews de jogos da Steam")
