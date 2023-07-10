@@ -4,7 +4,7 @@ import plotly.express as px
 import streamlit as st
 import random as rn
 from wordcloud import WordCloud
-import altair as alt
+import plotly.graph_objects as go
 from funcs import *
 
 st.set_page_config(
@@ -65,16 +65,26 @@ selected_chart = st.sidebar.selectbox('',graph_options)
 if selected_chart == "Histograma de sentimentos":
     st.subheader("Histograma de sentimentos")
     st.write('')
-    histograma_sentimentos = alt.Chart(df).mark_bar().encode(
-    x=alt.X('review_score', scale=alt.Scale(domain=[-1, 1]), 
-            axis=alt.Axis(tickCount=2, values=[-1,1])),
-    y='count()',
-    color=alt.Color('review_score', legend=None,
-        scale=alt.Scale(domain=["Negativa","Positiva"], range=['#FF4136', '#2ECC40']))
-    ).properties(width=600, height=400)
-    st.altair_chart(histograma_sentimentos)
-    st.write("Representação gráfica da distribuição de sentimentos em reviews de jogos da Steam")
+    histograma_sentimentos = go.Figure(data=[
+        go.Bar(
+            x=['Negativa', 'Positiva'],
+            y=df['review_score'].value_counts(),
+            marker=dict(
+                color=['#FF4136', '#2ECC40'],
+                line=dict(color='#000000', width=1)
+            )
+        )
+    ])
 
+    fig.update_layout(
+        title='Histograma de sentimentos',
+        xaxis_title='Score da review',
+        yaxis_title='Contagem de registros'
+    )
+
+    st.plotly_chart(histograma_sentimentos)
+    st.write("Representação gráfica da distribuição de sentimentos em reviews de jogos da Steam")
+    
 elif selected_chart == "Histograma de contagem de reviews recomendados por sentimento":
     st.subheader("Histograma de contagem de reviews recomendados por sentimento")
     sentiment_votes = df.groupby(['review_score', 'review_votes'])['app_id'].count().unstack('review_votes')
