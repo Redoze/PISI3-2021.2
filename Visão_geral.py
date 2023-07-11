@@ -38,7 +38,7 @@ graph_options = ["Histograma de sentimentos","Histograma de contagem de reviews 
 
 st.sidebar.subheader("Use o seletor para analisar todo do conjunto de dados:")
 st.text("")
-selected_chart = st.sidebar.selectbox('',graph_options)
+selected_chart = st.sidebar.selectbox('Selecione um grafico: ', graph_options)
 
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
@@ -62,7 +62,7 @@ selected_chart = st.sidebar.selectbox('',graph_options)
 #     st.plotly_chart(barras_horizontal)
 #     st.write("Representação gráfica dos 10 jogos com mais reviews, a sua distribuição de sentimento e o número de reviews")
 
-if selected_chart == "Histograma de sentimentos":
+if  selected_chart == "Histograma de sentimentos":
     st.subheader("Histograma de sentimentos")
     st.write('')
     histograma_sentimentos = go.Figure(data=[
@@ -76,31 +76,68 @@ if selected_chart == "Histograma de sentimentos":
         )
     ])
 
-    fig.update_layout(
+    histograma_sentimentos.update_layout(
         title='Histograma de sentimentos',
-        xaxis_title='Score da review',
+        xaxis_title='Polaridade da review',
         yaxis_title='Contagem de registros'
     )
 
     st.plotly_chart(histograma_sentimentos)
     st.write("Representação gráfica da distribuição de sentimentos em reviews de jogos da Steam")
-    
+
 elif selected_chart == "Histograma de contagem de reviews recomendados por sentimento":
     st.subheader("Histograma de contagem de reviews recomendados por sentimento")
     sentiment_votes = df.groupby(['review_score', 'review_votes'])['app_id'].count().unstack('review_votes')
-    barras_empilhadas = px.bar(sentiment_votes, barmode='stack', labels={'value': 'Contagem', 'review_score': 'Sentimento'})
-    barras_empilhadas.update_layout(#title="Contagem de reviews recomendados e não recomendados por sentimento"
+
+    sentiment_votes = sentiment_votes.rename(columns={0: 'Review não recomendada', 1: 'Review recomendada'})
+    sentiment_votes = sentiment_votes.rename(index={-1: 'Negativo', 1: 'Positivo'})
+
+    colors = ['#FF4136', '#2ECC40']
+
+    barras_agrupadas = go.Figure(data=[
+        go.Bar(name='Review não recomendada', x=sentiment_votes.index, y=sentiment_votes['Review não recomendada'], 
+               marker=dict(color=colors[0])),
+        go.Bar(name='Review recomendada', x=sentiment_votes.index, y=sentiment_votes['Review recomendada'], 
+               marker=dict(color=colors[1]))
+    ])
+
+    barras_agrupadas.update_layout(
+        title='Contagem de reviews recomendadas e não recomendadas por sentimento',
+        xaxis_title='Sentimento',
+        yaxis_title='Contagem de registros',
+        barmode='stack'
     )
-    st.plotly_chart(barras_empilhadas)
+
+    st.plotly_chart(barras_agrupadas)
     st.write("Representação gráfica da contagem de reviews recomendadas e não recomendadas por sentimento")
+
 
 elif selected_chart == "Gráfico de pizza de distribuição de sentimentos":
     st.subheader("Gráfico de pizza de distribuição de sentimentos")
-    pizza_chart = px.pie(df, values='review_votes', names='review_score', color='review_score')
+
+    sentiment_colors = {-1: '#FF4136', 1: '#2ECC40'}
+
+    pizza_chart = px.pie(df, values='review_votes', names='review_score', color='review_score',
+                         color_discrete_map=sentiment_colors)
+
     pizza_chart.update_layout(
-    # title="Distribuição de sentimentos",
-    legend_title="Sentimento",
-    width=1000,
-    height=600)
+        legend_title="Sentimento",
+        width=1000,
+        height=600
+    )
+
+    pizza_chart.update_traces(marker=dict(colors=[sentiment_colors[sentiment] for sentiment in df['review_score']]))
+    pizza_chart.update_layout(
+        legend=dict(
+            x=1.1,
+            y=0.5,
+            title="Sentimento",
+            title_font=dict(size=14),
+            itemsizing='constant'
+        )
+    )
+
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
+
+
