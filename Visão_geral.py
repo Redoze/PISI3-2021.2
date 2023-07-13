@@ -47,8 +47,8 @@ st.text("")
 selected_chart = st.sidebar.selectbox('Selecione um grafico: ', graph_options)
 
 st.write('TESTE')
-df = load_csv()
-df_tags = load_csv2()
+df = 1
+df_tags = 1
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 # if selected_chart == "Histograma dos 10 jogos com mais reviews":
