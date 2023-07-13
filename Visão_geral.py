@@ -37,7 +37,7 @@ else:
     st.header('Visão geral do conjunto de dados')
     st.text("")
     teste = carrega_review_text()
-    st.write(teste)
+    st.dataframe(teste)
     st.caption('review_score:  1 = review positiva, review_score: -1 = review negativa, review_votes:  1 = review recomendada, review_votes:  0 = review sem recomendação ou negativada')
     st.text("")
 
