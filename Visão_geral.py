@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Chama o carregamento e mesclagem do dataframe inteiro
-df1_merged = mescla_df(df1_completo, path_df1)
+#df1_merged = mescla_df(df1_completo, path_df1)
 #df2_merged = mescla_df(df2_completo, path_df2)
 
 #final_df = pd.merge(df1_merged, df2_merged, left_on="app_id", right_on="app_id", suffixes=("_df1", "_df2"))
@@ -36,7 +36,8 @@ if ocultar_df:
 else:
     st.header('Visão geral do conjunto de dados')
     st.text("")
-    st.write(df1_merged)
+    teste = carrega_review_text()
+    st.write(teste)
     st.caption('review_score:  1 = review positiva, review_score: -1 = review negativa, review_votes:  1 = review recomendada, review_votes:  0 = review sem recomendação ou negativada')
     st.text("")
 
