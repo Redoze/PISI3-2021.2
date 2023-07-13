@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="✅",
     layout="centered",
 )
-
+st.write('TESTE')
 # Chama o carregamento e mesclagem do dataframe inteiro
 df1_merged = mescla_df(df1_completo, path_df1)
 df2_merged = mescla_df(df2_completo, path_df2)
