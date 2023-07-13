@@ -65,15 +65,19 @@ def carrega_review_text():
     file_list = sorted([file for file in os.listdir(path_review_text) if file.endswith(".parquet")],
                     key=extract_part_number)
 
-    todos_reviews_text = []
+    merged_reviews_text = None
 
     # Ler os data frames e exibi-los com o Streamlit
     for file_name in file_list:
         file_path = os.path.join(path_review_text, file_name)
         df = pd.read_parquet(file_path)
-        todos_reviews_text.append(df)
-    
-    return todos_reviews_text
+
+        if merged_reviews_text is None:
+            merged_reviews_text = df
+        else:
+            merged_reviews_text = pd.concat([merged_reviews_text, df], ignore_index=True)
+
+    return merged_reviews_text
 
 # Se for chamar todo o dataframe 1 incluindo o review text, faça primeiro a chamada do review_text!
 # Mescla o dataframe a partir da lista com os nomes de suas colunas
@@ -95,9 +99,7 @@ def mescla_df(df_X_nome_coluna, path):
 
             if df_X_nome_coluna[i] == 'review_text':
                 # Chama o carregamento completo de review_text
-                review_text = carrega_review_text()
-                # Concatena todas as partes de review_text em uma única tabela
-                df1_review_text = pd.concat(review_text, ignore_index=True)
+                df1_review_text = carrega_review_text()
                 merged_dataframe = pd.merge(merged_dataframe, df1_review_text, left_index=True, right_index=True)
 
             else:
