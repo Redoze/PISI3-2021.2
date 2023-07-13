@@ -12,7 +12,7 @@ st.set_page_config(
     page_icon="✅",
     layout="centered",
 )
-st.write('TESTE')
+
 # Chama o carregamento e mesclagem do dataframe inteiro
 df1_merged = mescla_df(df1_completo, path_df1)
 df2_merged = mescla_df(df2_completo, path_df2)
@@ -46,6 +46,9 @@ st.sidebar.subheader("Use o seletor para analisar todo do conjunto de dados:")
 st.text("")
 selected_chart = st.sidebar.selectbox('Selecione um grafico: ', graph_options)
 
+st.write('TESTE')
+df = load_csv()
+df_tags = load_csv2()
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 # if selected_chart == "Histograma dos 10 jogos com mais reviews":
