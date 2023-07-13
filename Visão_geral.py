@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Chama o carregamento e mesclagem do dataframe inteiro
-#df1_merged = mescla_df(df1_completo, path_df1)
+df1_merged = mescla_df(df1_completo, path_df1)
 #df2_merged = mescla_df(df2_completo, path_df2)
 
 #final_df = pd.merge(df1_merged, df2_merged, left_on="app_id", right_on="app_id", suffixes=("_df1", "_df2"))
@@ -36,8 +36,7 @@ if ocultar_df:
 else:
     st.header('Visão geral do conjunto de dados')
     st.text("")
-    teste_so_review_text = carrega_review_text()
-    st.write(teste_so_review_text)
+    st.write(df1_merged)
     st.caption('review_score:  1 = review positiva, review_score: -1 = review negativa, review_votes:  1 = review recomendada, review_votes:  0 = review sem recomendação ou negativada')
     st.text("")
 
@@ -47,7 +46,6 @@ st.sidebar.subheader("Use o seletor para analisar todo do conjunto de dados:")
 st.text("")
 selected_chart = st.sidebar.selectbox('Selecione um grafico: ', graph_options)
 
-st.write('TESTE')
 df = 1
 df_tags = 1
 #::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -149,5 +147,3 @@ elif selected_chart == "Gráfico de pizza de distribuição de sentimentos":
 
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
-
-
