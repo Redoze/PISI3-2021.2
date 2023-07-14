@@ -5,30 +5,28 @@ import webbrowser
 st.set_page_config(
     page_title="Sobre",
     page_icon="📄",
-    layout="centered",
+    # layout="centered",
 )
 
-st.header('Sobre')
-st.text("")
+st.title('Sobre')
 st.markdown("---")
+st.header('Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III - 2022.2')
+st.subheader('Grupo GGJJLM')
 st.text("")
-st.subheader('Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III 2022.2')
-st.write('Grupo: #GGJJLM')
-st.text("")
+st.write("Participantes:")
 st.markdown(
 """
-Participantes:
 - Gabriel Duarte da Silva
 - Gabriel Moreira de Lemos e Silva
 - José Fernando de Oliveira Filho
 - José Francisco de Medeiros
 - Leonardo de Sousa Araújo Alcântara
 - Marcos de Oliveira de Jesus
-"""
-)
+""")
 st.text("")
-url = 'https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4'
 
-st.write('Acesso para o artigo:')
-if st.button('Link'):
-    webbrowser.open_new_tab(url)
+url1 = 'https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4'
+url2 = 'https://github.com/Redoze/PISI3-2022.2'
+texto = 'Acesse também o [artigo](%s) ou o [repositório](%s).' % (url1, url2)
+
+st.markdown(texto, unsafe_allow_html=True)
