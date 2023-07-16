@@ -19,14 +19,13 @@ def build_header():
     st.markdown("---")
 
 def build_body():
-    # Chama o carregamento e mesclagem do dataframe inteiro
-    #df1_merged = mescla_df(df1_completo, path_df1)
-    df2_merged = mescla_df(df2_completo, path_df2)
 
-    #final_df = pd.merge(df1_merged, df2_merged, left_on="app_id", right_on="app_id", suffixes=("_df1", "_df2"))
+    # pega_df1 = carrega_df('df1')
+    pega_df2 = carrega_df('df2')
+    # dfs = pd.merge(pega_df1, pega_df2, left_on="app_id", right_on="app_id", suffixes=("_df1", "_df2"))
 
-    # Remove a coluna app_id_df2
-    #final_df.drop(final_df.columns[5:6], axis=1, inplace=True)
+    # # Remove a coluna app_id_df2
+    # dfs.drop(dfs.columns[5:6], axis=1, inplace=True)
 
     ocultar_df = st.sidebar.checkbox('Ocultar conjunto de dados')
 
@@ -36,7 +35,7 @@ def build_body():
     else:
         st.header('Visão geral do conjunto de dados')
         st.text("")
-        st.dataframe(df2_merged)
+        st.dataframe(pega_df2)
         st.caption('Colocar legenda do df escolhido')
         st.text("")
 
