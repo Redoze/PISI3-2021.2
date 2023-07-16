@@ -4,6 +4,7 @@ import random as rn
 import os
 import re
 
+# Versão antiga de leitura dos dataframes. Ignorem e passem a usar a nova versão mais abaixo.
 @st.cache_resource
 def load_csv():
     p = 0.01
@@ -32,23 +33,38 @@ def load_csv3(gameid):
     df_time = pd.read_csv("pages/PlayerCountHistory/{}.csv".format(gameid))
     return df_time
 
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#:::::::::::::::::::::::::::::::::::::::::::::::::::::::  Introdução  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-# Lista com os nomes das colunas originais dos dataframes
-# Cada coluna foi transormada em um outro dataframe e convertido para parquet
-# A coluna principal é a review_text, que precisou ser dividida em partes menores e
-# consequentemente precisa ser processada separadamente.
-df1_completo = ['app_id', 'app_name', 'review_score', 'review_votes', 'review_text']
-df2_completo = ['app_id', 'app_name', 'release_date', 'english', 'developer', 'publisher', 'platforms', 'required_age',
+# Os dataframes foram divididos pelas suas colunas, agora cada coluna passou a ser um arquivo independente que também foi
+# convertido para o formato parquet.
+# Os principais dados do projeto estão contidos na coluna "review_text" do dataframe 1. Pelo seu tamanho ser muito elevado,
+# foi necessario dividi-lo em partes menores. Ou seja, ele possui um função própria para processá-lo.
+
+# Dicionário com o dataframe e suas colunas.
+dataframes = {'df1':['app_id', 'app_name', 'review_score', 'review_votes', 'review_text'],
+              'df2':['app_id', 'app_name', 'release_date', 'english', 'developer', 'publisher', 'platforms', 'required_age',
              'categories', 'genres', 'steamspy_tags', 'achievements', 'positive_ratings', 'negative_ratings',
-             'average_playtime', 'median_playtime', 'owners', 'price']
+             'average_playtime', 'median_playtime', 'owners', 'price']}
 
 path_df1 = 'data/df1/'
 path_df2 = 'data/df2/'
 
-# Carrega uma coluna especifica do dataframe
-# # # Não passe review_text como parâmetro! # # #
-def carrega_df(coluna, path):
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+# Retorna o caminho do dataframe da coluna escolhida
+def procura_coluna(nome_coluna):
+    for df, colunas in dataframes.items():
+        if nome_coluna in colunas:
+            if df == 'df1':
+                return path_df1
+            if df == 'df2':
+                return path_df2
+    return None
+
+# Carrega uma coluna especifica
+# # # Não passe review_text como argumento! # # #
+def carrega_coluna(coluna):
+    path = procura_coluna(coluna)
     df_coluna = pd.read_parquet(f'{path}/{coluna}.parquet')
     return df_coluna
 
@@ -79,40 +95,59 @@ def carrega_review_text():
 
     return merged_reviews_text
 
-# Se for chamar todo o dataframe 1 incluindo o review text, faça primeiro a chamada do review_text!
-# Mescla o dataframe a partir da lista com os nomes de suas colunas
-# Retorna um dataframe original completo
-def mescla_df(df_X_nome_coluna, path):
+# Fundi duas colunas. Os parâmetros são: nome da primeira coluna e o caminho de seu dataframe e o nome da segunda coluna
+# e seu caminho de seu dataframe.
+# Esta função também pode misturar colunas de diferentes dataframes, por isso cada coluna recebe seu devido caminho.
+def mistura_coluna(coluna1, coluna2):
 
-    # A mesclagem é feita de dois em dois df's, e salva em uma variável.
-    # Para mesclar três ou mais é necessário mesclar a variável anterior com o df seguinte
-    def primeira_mesclagem(df_X_nome_coluna, path):
-        merge_1 = carrega_df(df_X_nome_coluna[0], path)
-        return merge_1
-    
-    # df1_completo possui o review_text
-    if df_X_nome_coluna is df1_completo:
+    if coluna1 == 'review_text' or coluna2 == 'review_text':
+        if coluna1 == 'review_text':
+                    coluna1 = carrega_review_text()
+                    coluna2 = carrega_coluna(coluna2)
+                    merge = pd.merge(coluna1, coluna2, left_index=True, right_index=True)
+                    return merge
+        
+        else:
+            coluna1 = carrega_coluna(coluna1)
+            coluna2 = carrega_review_text()
+            merge = pd.merge(coluna1, coluna2, left_index=True, right_index=True)
+            return merge
 
-        merged_dataframe = primeira_mesclagem(df_X_nome_coluna, path)
-
-        for i in range(1, len(df_X_nome_coluna)):
-
-            if df_X_nome_coluna[i] == 'review_text':
-                # Chama o carregamento completo de review_text
-                df1_review_text = carrega_review_text()
-                merged_dataframe = pd.merge(merged_dataframe, df1_review_text, left_index=True, right_index=True)
-
-            else:
-                chama_carregamento = carrega_df(df_X_nome_coluna[i], path)
-                merged_dataframe = pd.merge(merged_dataframe, chama_carregamento, left_index=True, right_index=True)
-
-        return merged_dataframe
-    
     else:
-        merged_dataframe = primeira_mesclagem(df_X_nome_coluna, path)
+        coluna1 = carrega_coluna(coluna1)
+        coluna2 = carrega_coluna(coluna2)
+        merge = pd.merge(coluna1, coluna2, left_index=True, right_index=True)
 
-        for i in range(1, len(df_X_nome_coluna)):
-            chama_carregamento = carrega_df(df_X_nome_coluna[i], path)
+        return merge
+
+# Retorna o dataframe completo
+def carrega_df(nome_df):
+    
+    if nome_df == 'df1':
+        df1_colunas = dataframes['df1']
+
+        # Para carregar um dataframe completo ou duas ou mais colunas, é primeiramente preciso fundir as duas primeiras colunas.
+        # Para só depois fundir as duas primeiras juntas com a seguinte. Motivo que faz com que o for abaixo comece na posição 1.
+        merged_dataframe = carrega_coluna(df1_colunas[0])
+
+        for i in range(1, len(df1_colunas)):
+
+            if df1_colunas[i] != 'review_text':
+                chama_carregamento = carrega_coluna(df1_colunas[i])
+                merged_dataframe = pd.merge(merged_dataframe, chama_carregamento, left_index=True, right_index=True)
+            elif df1_colunas[i] == 'review_text':
+                chama_carregamento = carrega_review_text()
+                merged_dataframe = pd.merge(merged_dataframe, chama_carregamento, left_index=True, right_index=True)
+                
+        return merged_dataframe
+
+    if nome_df == 'df2':
+        df2_colunas = dataframes['df2']
+        # Mesmo propósito do uso acima.
+        merged_dataframe = carrega_coluna(df2_colunas[0])
+
+        for i in range(1, len(df2_colunas)):
+            chama_carregamento = carrega_coluna(df2_colunas[i])
             merged_dataframe = pd.merge(merged_dataframe, chama_carregamento, left_index=True, right_index=True)
 
         return merged_dataframe
