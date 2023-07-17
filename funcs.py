@@ -33,26 +33,25 @@ def load_csv3(gameid):
     df_time = pd.read_csv("pages/PlayerCountHistory/{}.csv".format(gameid))
     return df_time
 
-#:::::::::::::::::::::::::::::::::::::::::::::::::::::::  Introdução  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 # Os dataframes foram divididos pelas suas colunas, agora cada coluna passou a ser um arquivo independente que também foi
 # convertido para o formato parquet.
 # Os principais dados do projeto estão contidos na coluna "review_text" do dataframe 1. Pelo seu tamanho ser muito elevado,
-# foi necessario dividi-lo em partes menores. Ou seja, ele possui um função própria para processá-lo.
+# foi necessário dividi-lo em partes menores. Ou seja, ele possui uma função própria para processá-lo.
 
-# Dicionário com o dataframe e suas colunas.
+# Dicionário com os dataframes e suas colunas.
 dataframes = {'df1':['app_id', 'app_name', 'review_score', 'review_votes', 'review_text'],
-              'df2':['app_id', 'app_name', 'release_date', 'english', 'developer', 'publisher', 'platforms', 'required_age',
+              'df2':['app_id_df2', 'app_name_df2', 'release_date', 'english', 'developer', 'publisher', 'platforms', 'required_age',
              'categories', 'genres', 'steamspy_tags', 'achievements', 'positive_ratings', 'negative_ratings',
              'average_playtime', 'median_playtime', 'owners', 'price']}
 
-path_df1 = 'data/df1/'
-path_df2 = 'data/df2/'
-
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
 # Retorna o caminho do dataframe da coluna escolhida
 def procura_coluna(nome_coluna):
+
+    path_df1 = 'data/df1/'
+    path_df2 = 'data/df2/'
+
     for df, colunas in dataframes.items():
         if nome_coluna in colunas:
             if df == 'df1':
@@ -98,7 +97,7 @@ def carrega_review_text():
 # Fundi duas colunas. Os parâmetros são: nome da primeira coluna e o caminho de seu dataframe e o nome da segunda coluna
 # e seu caminho de seu dataframe.
 # Esta função também pode misturar colunas de diferentes dataframes, por isso cada coluna recebe seu devido caminho.
-def mistura_coluna(coluna1, coluna2):
+def mistura_colunas(coluna1, coluna2):
 
     if coluna1 == 'review_text' or coluna2 == 'review_text':
         if coluna1 == 'review_text':
