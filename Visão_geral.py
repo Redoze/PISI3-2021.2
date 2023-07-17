@@ -21,9 +21,7 @@ def build_header():
 def build_body():
 
     # pega_df1 = carrega_df('df1')
-    pega_df2 = carrega_df('df2')
-    # dfs = pd.merge(pega_df1, pega_df2, left_on="app_id", right_on="app_id", suffixes=("_df1", "_df2"))
-
+    # dfs = pd.merge(pega_df1, pega_df2, left_\\\\\\\\\\on="app_id", right_on="app_id", suffixes=("_df1", "_df2"))
     # # Remove a coluna app_id_df2
     # dfs.drop(dfs.columns[5:6], axis=1, inplace=True)
 
@@ -35,21 +33,56 @@ def build_body():
     else:
         st.header('Visão geral do conjunto de dados')
         st.text("")
-        st.dataframe(pega_df2)
-        st.caption('Colocar legenda do df escolhido')
+        pega_df2 = carrega_df('df2')
+        pega_df2 = pega_df2.rename(columns={'app_id_df2': 'id', 'app_name_df2': 'nome', 'release_date': 'Lançamento',
+                                            'developer': 'Desenvolvedor', 'publisher': 'Publicador', 'platforms': 'Plataforma',
+                                            'required_age': 'Faixa etária', 'categories': 'Categorias', 'genres': 'Gêneros',
+                                            'steamspy_tags' : 'Tags da Steam', 'achievements': 'Conquistas', 
+                                            'positive_ratings': 'Avaliações positivas', 'negative_ratings': 'Avaliações Negativas',
+                                            'owners': 'Donos?', 'price': 'Preço'})
+        st.dataframe(pega_df2, hide_index=True)
+        st.caption('A tabela acima apresenta os dados gerais do jogos utilizados durante o trabalho. Seus dados são provenientes do segundo dataframe.')
         st.text("")
 
-    graph_options = ['g1', 'g2', 'g3', 'g0','grafico_dispersao']
+    st.header("Estatíscas gerais dos conjuntos de dados")
+    st.text("")
 
+    col1, col2 = st.columns(2)
+
+    with col1:
+        carrega_df2_app_id = carrega_coluna('app_id_df2')
+        qtd_jogos = len(carrega_df2_app_id) - 1
+
+        carrega_df1_app_id = carrega_coluna('app_id')
+        qtd_reviews = len(carrega_df1_app_id) - 1
+
+        qtd_jogos_formatado = '{:,.0f}'.format(qtd_jogos).replace(',', '.')
+        qtd_reviews_formatado = '{:,.0f}'.format(qtd_reviews).replace(',', '.')
+
+        st.write('Quantidade total de jogos: %s' % qtd_jogos_formatado)
+        st.write('Quantidade total de avaliações: %s' % qtd_reviews_formatado)
+
+    with col2: 
+        merged_id_e_review = mistura_colunas('app_id', 'review_text')
+
+        # Calcula a média de reviews por jogo
+        media_reviews = merged_id_e_review.groupby('app_id')['app_id'].count().mean()
+
+        media_reviews_formatado = '{:.2f}'.format(round(media_reviews, 2)).replace('.', ',')
+
+        st.write('Quantidade média de avaliações por jogo: %s' % media_reviews_formatado)
+    
+    graph_options = ['g1', 'g2', 'g3', 'g0']
+    st.text("")
     st.subheader("Use o seletor para analisar todo do conjunto de dados:")
     st.text("")
     selected_chart = st.selectbox('Selecione um grafico: ', graph_options)
 
     for nome_funcao in graph_options:
         if nome_funcao == selected_chart:
-            chama_funcao = globals()[selected_chart]
-            chama_funcao(pega_df2)
-
+            chama_funcao = globals()[graph_options]
+            chama_funcao()
+    
     # Os gráficos estavam chamando os dataframes pelas variáveis abaixo
     df = 1
     df_tags = 1
@@ -155,59 +188,6 @@ def g3():
 
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
-
-def grafico_dispersao(pega_df2):
-    nomes = "Relação entre classificações e tempo de jogo"
-    st.subheader("Relação entre classificações e tempo de jogo")
-
-
-    average_playtime = pega_df2['average_playtime']
-    positive_ratings = pega_df2['positive_ratings']
-    negative_ratings = pega_df2['negative_ratings']
-    game_names = pega_df2['app_name']
-    genres = pega_df2['genres']
-
-
-    colors = ['#FF4136', '#2ECC40']
-    sizes=10
-
-
-    #Cria um scatter com cores diferentes para cada categoria de avaliação
-    fig = go.Figure()
-    fig.add_trace(
-        go.Scatter(
-        x=average_playtime,
-        y=positive_ratings,
-        mode='markers',
-        name='Avaliações Positivas',
-        marker=dict(color=colors[1],
-                    size=sizes),
-        text=[f'{name}<br>Genres: {genre}' for name, genre in zip(game_names, genres)],
-        hovertemplate='%{text}<br>Average Playtime: %{x}<br>Positive Ratings: %{y}<extra></extra>'
-    ))
-
-
-    fig.add_trace(
-        go.Scatter(
-        x=average_playtime,
-        y=negative_ratings,
-        mode='markers',
-        name='Avaliações Negativas',
-        marker=dict(color=colors[0],
-                    size=sizes),
-        text=[f'{name}<br>Genres: {genre}' for name, genre in zip(game_names, genres)],
-        hovertemplate='%{text}<br>Average Playtime: %{x}<br>Negative Ratings: %{y}<extra></extra>'
-    ))
-
-
-    fig.update_layout(
-        title='Avaliações em relação ao tempo médio de jogo',
-        xaxis_title='Tempo médio de jogo',
-        yaxis_title='Avaliações',
-        width=850,
-        height=500
-    )
-    st.plotly_chart(fig)
 
 build_header()
 build_body()
