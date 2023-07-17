@@ -39,7 +39,7 @@ def build_body():
         st.caption('Colocar legenda do df escolhido')
         st.text("")
 
-    graph_options = ['g1', 'g2', 'g3', 'g0']
+    graph_options = ['g1', 'g2', 'g3', 'g0','grafico_dispersao']
 
     st.subheader("Use o seletor para analisar todo do conjunto de dados:")
     st.text("")
@@ -47,8 +47,8 @@ def build_body():
 
     for nome_funcao in graph_options:
         if nome_funcao == selected_chart:
-            chama_funcao = globals()[graph_options]
-            chama_funcao()
+            chama_funcao = globals()[selected_chart]
+            chama_funcao(pega_df2)
 
     # Os gráficos estavam chamando os dataframes pelas variáveis abaixo
     df = 1
@@ -155,6 +155,59 @@ def g3():
 
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
+
+def grafico_dispersao(pega_df2):
+    nomes = "Relação entre classificações e tempo de jogo"
+    st.subheader("Relação entre classificações e tempo de jogo")
+
+
+    average_playtime = pega_df2['average_playtime']
+    positive_ratings = pega_df2['positive_ratings']
+    negative_ratings = pega_df2['negative_ratings']
+    game_names = pega_df2['app_name']
+    genres = pega_df2['genres']
+
+
+    colors = ['#FF4136', '#2ECC40']
+    sizes=10
+
+
+    #Cria um scatter com cores diferentes para cada categoria de avaliação
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+        x=average_playtime,
+        y=positive_ratings,
+        mode='markers',
+        name='Avaliações Positivas',
+        marker=dict(color=colors[1],
+                    size=sizes),
+        text=[f'{name}<br>Genres: {genre}' for name, genre in zip(game_names, genres)],
+        hovertemplate='%{text}<br>Average Playtime: %{x}<br>Positive Ratings: %{y}<extra></extra>'
+    ))
+
+
+    fig.add_trace(
+        go.Scatter(
+        x=average_playtime,
+        y=negative_ratings,
+        mode='markers',
+        name='Avaliações Negativas',
+        marker=dict(color=colors[0],
+                    size=sizes),
+        text=[f'{name}<br>Genres: {genre}' for name, genre in zip(game_names, genres)],
+        hovertemplate='%{text}<br>Average Playtime: %{x}<br>Negative Ratings: %{y}<extra></extra>'
+    ))
+
+
+    fig.update_layout(
+        title='Avaliações em relação ao tempo médio de jogo',
+        xaxis_title='Tempo médio de jogo',
+        yaxis_title='Avaliações',
+        width=850,
+        height=500
+    )
+    st.plotly_chart(fig)
 
 build_header()
 build_body()
