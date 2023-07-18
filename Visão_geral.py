@@ -72,13 +72,14 @@ def build_body():
 
         st.write('Quantidade média de avaliações por jogo: %s' % media_reviews_formatado)
     
-    graph_options = ['g1', 'g2', 'g3', 'g0']
+    graph_options = {'g1':"Histograma de sentimentos", 'g2':"Histograma de contagem de reviews recomendados por sentimento", 'g3':"Gráfico de pizza de distribuição de sentimentos", 
+        'g0':"Histograma dos 10 jogos com mais reviews"}
     st.text("")
     st.subheader("Use o seletor para analisar todo do conjunto de dados:")
     st.text("")
     selected_chart = st.selectbox('Selecione um grafico: ', graph_options)
 
-    for nome_funcao in graph_options:
+    for nome_funcao, graficos in graph_options.items():
         if nome_funcao == selected_chart:
             chama_funcao = globals()[graph_options]
             chama_funcao()
@@ -188,6 +189,46 @@ def g3():
 
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
+def g4():
+    nome="Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores"
+    df_merged_g4 = mistura_colunas(app_id, review_score)
+    st.subheader("Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores")
+
+    #calcular a media de polaridade de reviews por jogo
+    positivas = df_merged_g4.groupby('app_id')['review_score'].sum()
+    reviews_totais = df_merged_g4.groupby('app_id')['review_score'].count()
+    med_polaridade = ((positivas / reviews_totais) * 100).clip(lower=0)
+    
+    player_counts = []
+    app_ids = []
+    app_names = []
+
+    #carregar os dados de contagemd e jogadores
+    for app_id in med_polaridade.index:
+        try:
+            player_data = load_csv3(app_id)
+            player_count = player_data['Playercount'].mean()
+            player_counts.append(player_count)
+            app_name = df_merged_g4[df_merged_g4['app_id'] == app_id]['app_name'].values[0]
+            app_ids.append(app_id)
+            app_names.append(app_name)
+        except FileNotFoundError:
+            #st.write(f"Aviso: Nenhum dado de qtd. de jogadores para o ID encontrado: {app_id}")  #pular jogos sem dados de playercount
+            pass
+
+    #df com a player count de cada jogo
+    player_df = pd.DataFrame({'app_id': app_ids, 'app_name': app_names, 'player_count': player_counts})
+    #df com playercount e sentimentos
+    merged_player_sentimentos_df = pd.merge(med_polaridade.reset_index(), player_df, on='app_id')
+
+    fig = px.scatter(merged_player_sentimentos_df, x="review_score", y="player_count",
+                     title='Correlação entre a polaridade média das reviews e a quantidade média de jogadores',
+                     labels={'review_score':'Média das reviews (%)', 'player_count':'Quantidade média de jogadores'},
+                     hover_data=['app_name'],
+                     color='review_score',            
+                     color_continuous_scale=[(0, "red"),(1, "green")])
+    st.plotly_chart(fig)
+
 
 build_header()
 build_body()
