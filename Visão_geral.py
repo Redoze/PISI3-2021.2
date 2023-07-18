@@ -72,7 +72,7 @@ def build_body():
 
         st.write('Quantidade média de avaliações por jogo: %s' % media_reviews_formatado)
     
-    graph_options = {'g1':"Histograma de sentimentos", 'g2':"Histograma de contagem de reviews recomendados por sentimento", 'g3':"Gráfico de pizza de distribuição de sentimentos", 
+    graph_options = {'g1':"Histograma de sentimentos", 'g2':"Histograma de contagem de reviews recomendados por sentimento", 'g3':"Gráfico de pizza de distribuição de sentimentos", 'g4':"Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores",
         'g0':"Histograma dos 10 jogos com mais reviews"}
     st.text("")
     st.subheader("Use o seletor para analisar todo do conjunto de dados:")
@@ -80,7 +80,7 @@ def build_body():
     selected_chart = st.selectbox('Selecione um grafico: ', graph_options)
 
     for nome_funcao, graficos in graph_options.items():
-        if nome_funcao == selected_chart:
+        if graficos == selected_chart:
             chama_funcao = globals()[graph_options]
             chama_funcao()
     
@@ -90,7 +90,7 @@ def build_body():
 
 def g0():
     # Esse é o gráfico bichado lá
-    nome = "Histograma dos 10 jogos com mais reviews"
+
     st.subheader("Histograma dos 10 jogos com mais reviews") 
     dados_jogos = df.groupby(["app_id", "app_name", "review_score"]).agg({"review_text": "count"}).reset_index()
     dados_jogos = dados_jogos.rename(columns={"review_text": "review_count"})
@@ -111,7 +111,7 @@ def g0():
     st.write("Representação gráfica dos 10 jogos com mais reviews, a sua distribuição de sentimento e o número de reviews")
 
 def g1():
-    nome = "Histograma de sentimentos"
+
     st.subheader("Histograma de sentimentos")
     st.write('')
     histograma_sentimentos = go.Figure(data=[
@@ -135,7 +135,7 @@ def g1():
     st.write("Representação gráfica da distribuição de sentimentos em reviews de jogos da Steam")
 
 def g2():
-    nome = "Histograma de contagem de reviews recomendados por sentimento"
+
     st.subheader("Histograma de contagem de reviews recomendados por sentimento")
     sentiment_votes = df.groupby(['review_score', 'review_votes'])['app_id'].count().unstack('review_votes')
 
@@ -162,7 +162,7 @@ def g2():
     st.write("Representação gráfica da contagem de reviews recomendadas e não recomendadas por sentimento")
 
 def g3():
-    nomes = "Gráfico de pizza de distribuição de sentimentos"
+
     st.subheader("Gráfico de pizza de distribuição de sentimentos")
 
     sentiment_colors = {-1: '#FF4136', 1: '#2ECC40'}
@@ -190,7 +190,7 @@ def g3():
     st.plotly_chart(pizza_chart)
     st.write("Representação gráfica da proporção de sentimentos positivos e negativos nas reviews")
 def g4():
-    nome="Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores"
+
     df_merged_g4 = mistura_colunas(app_id, review_score)
     st.subheader("Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores")
 
