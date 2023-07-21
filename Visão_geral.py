@@ -1,11 +1,6 @@
-import pandas as pd
-import numpy as np
-import plotly.express as px
 import streamlit as st
-import random as rn
-from wordcloud import WordCloud
-import plotly.graph_objects as go
 from funcs import *
+from collections import Counter
 
 st.set_page_config(
     page_title="Análise de sentimentos em avaliações de jogos na Steam",
@@ -33,9 +28,11 @@ def build_body():
                                             'required_age': 'Faixa etária', 'categories': 'Categorias', 'genres': 'Gêneros',
                                             'steamspy_tags' : 'Tags da Steam', 'achievements': 'Conquistas', 
                                             'positive_ratings': 'Avaliações positivas', 'negative_ratings': 'Avaliações Negativas',
-                                            'owners': 'Donos?', 'price': 'Preço'})
-        st.dataframe(pega_df2)
-        st.caption('A tabela acima apresenta os dados gerais dos jogos utilizados durante o trabalho. Seus dados são provenientes do segundo dataframe.')
+                                            'average_playtime': 'Tempo médio de jogo', 'median_playtime': 'Tempo mediano de jogo',
+                                            'owners': 'Jogadores únicos', 'price': 'Preço'})
+
+        st.dataframe(pega_df2, hide_index=True)
+        st.write('A tabela acima apresenta os dados gerais dos jogos utilizados durante o trabalho. Esses dados são provenientes apenas do segundo dataframe.')
         st.text("")
 
     st.header("Estatísticas gerais dos conjuntos de dados")
@@ -65,11 +62,27 @@ def build_body():
         media_reviews_formatado = '{:.2f}'.format(round(media_reviews, 2)).replace('.', ',')
 
         st.write('Quantidade média de avaliações por jogo: %s' % media_reviews_formatado)
-    
-    
-    
+
+        # Função para encontrar a palavra mais comum no DataFrame
+        def palavra_mais_comum(dataframe):
+            # Transforma a coluna em uma lista de palavras separadas por ";"
+            words_list = ';'.join(dataframe['categories']).split(';')
+
+            # Conta a frequência de cada palavra usando Counter
+            word_count = Counter(words_list)
+
+            # Encontra a palavra mais comum
+            most_common_word = word_count.most_common(1)[0][0]
+
+            return most_common_word
+
+        # Lê o DataFrame usando a função chama_coluna
+        df = carrega_coluna('categories')
+
+        # Encontra a palavra mais comum em todo o DataFrame
+        palavra_mais_frequente = palavra_mais_comum(df)
+
+        st.write("Categoria mais frequente: ", palavra_mais_frequente)
 
 build_header()
 build_body()
-
-
