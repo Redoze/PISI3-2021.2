@@ -47,6 +47,7 @@ dataframes = {'df1':['app_id', 'app_name', 'review_score', 'review_votes', 'revi
              'average_playtime', 'median_playtime', 'owners', 'price']}
 
 # Retorna o caminho do dataframe da coluna escolhida
+@st.cache_resource
 def procura_coluna(nome_coluna):
 
     path_df1 = 'data/df1/'
@@ -62,12 +63,14 @@ def procura_coluna(nome_coluna):
 
 # Carrega uma coluna especifica
 # # # Não passe review_text como argumento! # # #
+@st.cache_resource
 def carrega_coluna(coluna):
     path = procura_coluna(coluna)
     df_coluna = pd.read_parquet(f'{path}/{coluna}.parquet')
     return df_coluna
 
 # Sempre utilize esta função para carregar review_text
+@st.cache_resource
 def carrega_review_text():
     # Função para extrair o número da parte do nome do arquivo
     def extract_part_number(file_name):
@@ -97,6 +100,7 @@ def carrega_review_text():
 # Fundi duas colunas. Os parâmetros são: nome da primeira coluna e o caminho de seu dataframe e o nome da segunda coluna
 # e seu caminho de seu dataframe.
 # Esta função também pode misturar colunas de diferentes dataframes, por isso cada coluna recebe seu devido caminho.
+@st.cache_resource
 def mistura_colunas(coluna1, coluna2):
 
     if coluna1 == 'review_text' or coluna2 == 'review_text':
@@ -120,6 +124,7 @@ def mistura_colunas(coluna1, coluna2):
         return merge
 
 # Retorna o dataframe completo
+@st.cache_resource
 def carrega_df(nome_df):
     
     if nome_df == 'df1':
