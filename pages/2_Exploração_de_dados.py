@@ -29,7 +29,7 @@ def build_body():
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
     graph_options = ["Nuvem de palavras", "Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
-                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos"]
+                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre classificações e tempo de jogo"]
 
     # Usa o multiselect para definir as opções
     selected_games = st.sidebar.multiselect("Selecione o(s) jogo(s)", game_options)
@@ -165,6 +165,78 @@ def build_body():
 
         st.plotly_chart(fig_pizza)
         st.write("Representação gráfica da distribuição de reviews positivas e negativas")
+
+    elif selected_graph == "Relação entre classificações e tempo de jogo":
+        st.subheader("Relação entre classificações e tempo de jogo")
+
+        df5 = carrega_df('df2')
+        average_playtime = df5['average_playtime']
+        positive_ratings = df5['positive_ratings']
+        negative_ratings = df5['negative_ratings']
+        game_names = df5['app_name_df2']
+        genres = df5['genres']
+
+        # Criando uma barra deslizante (slider) para o threshold
+        threshold = st.slider("Selecione o valor para aumentar ou diminiur a quantidade de outliers", min_value=1, max_value=10, value=3, step=1)
+
+        # Restante do código para detecção e remoção de outliers
+        filtered_data = df5.copy()
+
+        # Remove outliers usando Z-score para as colunas relevantes
+        filtered_data = remove_outliers_zscore(df5, ['average_playtime', 'positive_ratings', 'negative_ratings'],threshold=threshold)
+
+         # Criando um botão para alternar entre mostrar e ocultar os outliers
+        show_outliers = st.checkbox("Mostrar gráfico original com Outliers", value=False)
+
+        if show_outliers:
+            # Mostrar o gráfico com outliers
+            data_to_plot = df5
+        else:
+            # Mostrar o gráfico sem outliers
+            data_to_plot = filtered_data
+
+        colors = ['#FF4136', '#2ECC40']
+        sizes=10
+
+        #Cria um scatter com cores diferentes para cada categoria de avaliação(Positiva, Negativa)
+        fig = go.Figure()
+         # Adicionando o scatter plot para as avaliações positivas
+        fig.add_trace(
+            go.Scatter(
+                x=data_to_plot['average_playtime'],
+                y=data_to_plot['positive_ratings'],
+                mode='markers',
+                name='Avaliações Positivas',
+                marker=dict(color=colors[1], size=sizes),
+                text=[f'Jogo: {name}<br>Gênero: {genre}<br>Tempo Médio de Jogo: {playtime}<br>Avaliações Positivas: {pos_ratings}'
+                    for name, genre, playtime, pos_ratings in
+                    zip(data_to_plot['app_name_df2'], data_to_plot['genres'], data_to_plot['average_playtime'], data_to_plot['positive_ratings'])],
+                hovertemplate='%{text}<extra></extra>'
+            ))
+
+        # Adicionando o scatter plot para as avaliações negativas
+        fig.add_trace(
+            go.Scatter(
+                x=data_to_plot['average_playtime'],
+                y=data_to_plot['negative_ratings'],
+                mode='markers',
+                name='Avaliações Negativas',
+                marker=dict(color=colors[0], size=sizes),
+                text=[f'Jogo: {name}<br>Gênero: {genre}<br>Tempo Médio de Jogo: {playtime}<br>Avaliações Negativas: {neg_ratings}'
+                    for name, genre, playtime, neg_ratings in
+                    zip(data_to_plot['app_name_df2'], data_to_plot['genres'], data_to_plot['average_playtime'], data_to_plot['negative_ratings'])],
+                hovertemplate='%{text}<extra></extra>'
+            ))
+
+        fig.update_layout(
+            title='Avaliações em relação ao tempo médio de jogo',
+            xaxis_title='Tempo médio de jogo',
+            yaxis_title='Avaliações',
+            width=850,
+            height=500
+        )
+        
+        st.plotly_chart(fig)
 
 def main():
     build_header()
