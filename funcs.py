@@ -3,6 +3,8 @@ import pandas as pd
 import random as rn
 import os
 import re
+import numpy as np
+from scipy import stats
 
 # Versão antiga de leitura dos dataframes. Ignorem e passem a usar a nova versão mais abaixo.
 @st.cache_resource
@@ -155,3 +157,7 @@ def carrega_df(nome_df):
             merged_dataframe = pd.merge(merged_dataframe, chama_carregamento, left_index=True, right_index=True)
 
         return merged_dataframe
+    
+def remove_outliers_zscore(df, columns, threshold=3):
+    z_scores = np.abs(stats.zscore(df[columns]))
+    return df[(z_scores < threshold).all(axis=1)]
