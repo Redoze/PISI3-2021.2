@@ -264,7 +264,7 @@ def build_body():
         #carregar os dados de contagemd e jogadores
         for app_id in med_polaridade.index:
             try:
-                player_data = load_csv3(app_id)
+                player_data = carrega_df(app_id)
                 player_count = player_data['Playercount'].mean()
                 player_counts.append(player_count)
                 app_name = filtered_data_2[filtered_data_2['app_id'] == app_id]['app_name'].values[0]
