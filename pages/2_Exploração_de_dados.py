@@ -29,7 +29,8 @@ def build_body():
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
     graph_options = ["Nuvem de palavras", "Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
-                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre classificações e tempo de jogo"]
+                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre classificações e tempo de jogo",
+                    "Correlação entre a polaridade média das reviews e a quantidade média de jogadores"]
 
     # Usa o multiselect para definir as opções
     selected_games = st.sidebar.multiselect("Selecione o(s) jogo(s)", game_options)
@@ -236,6 +237,53 @@ def build_body():
             height=500
         )
         
+        st.plotly_chart(fig)
+        elif selected_graph == "Correlação entre a polaridade média das reviews e a quantidade média de jogadores":
+        st.subheader("Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores")
+
+        df6 = carrega_df('df1')
+        if not selected_games:
+            selected_games = df6['app_name'].unique()
+
+        filtered_data_2 = df6[(df6["app_name"].isin(selected_games))]
+        #calcular a media de polaridade de reviews por jogo
+        positivas = filtered_data_2.groupby('app_id')['review_score'].sum()
+        reviews_totais = filtered_data_2.groupby('app_id')['review_score'].count()
+        med_polaridade = ((positivas / reviews_totais) * 100).clip(lower=0)
+
+        #filtrar os jogos baseado na média de reviews
+        if 'Negativa' in selected_reviews and 'Positiva' not in selected_reviews:
+            med_polaridade = med_polaridade[med_polaridade < 50]
+        elif 'Positiva' in selected_reviews and 'Negativa' not in selected_reviews:
+            med_polaridade = med_polaridade[med_polaridade >= 50]
+        
+        player_counts = []
+        app_ids = []
+        app_names = []
+        
+        #carregar os dados de contagemd e jogadores
+        for app_id in med_polaridade.index:
+            try:
+                player_data = load_csv3(app_id)
+                player_count = player_data['Playercount'].mean()
+                player_counts.append(player_count)
+                app_name = filtered_data_2[filtered_data_2['app_id'] == app_id]['app_name'].values[0]
+                app_ids.append(app_id)
+                app_names.append(app_name)
+            except FileNotFoundError:
+                pass
+
+        #df com a player count de cada jogo
+        player_df = pd.DataFrame({'app_id': app_ids, 'app_name': app_names, 'player_count': player_counts})
+        #df com playercount e sentimentos
+        merged_player_sentimentos_df = pd.merge(med_polaridade.reset_index(), player_df, on='app_id')
+
+        fig = px.scatter(merged_player_sentimentos_df, x="review_score", y="player_count",
+                         title='Correlação entre a polaridade média das reviews e a quantidade média de jogadores',
+                         labels={'review_score':'Média das reviews (%)', 'player_count':'Quantidade média de jogadores'},
+                         hover_data=['app_name'],
+                         color='review_score',            
+                         color_continuous_scale=[(0, "red"),(1, "green")])
         st.plotly_chart(fig)
 
 def main():
