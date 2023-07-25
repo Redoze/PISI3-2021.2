@@ -238,7 +238,7 @@ def build_body():
         )
         
         st.plotly_chart(fig)
-        elif selected_graph == "Correlação entre a polaridade média das reviews e a quantidade média de jogadores":
+     elif selected_graph == "Correlação entre a polaridade média das reviews e a quantidade média de jogadores":
         st.subheader("Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores")
 
         df6 = carrega_df('df1')
