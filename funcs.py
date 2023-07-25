@@ -157,6 +157,12 @@ def carrega_df(nome_df):
             merged_dataframe = pd.merge(merged_dataframe, chama_carregamento, left_index=True, right_index=True)
 
         return merged_dataframe
+
+    else:
+        file_path = os.path.join("data/df3/", nome_df)
+        df3 = pd.read_parquet(f'{file_path}/{nome_df}.parquet')
+        return df3
+    
     
 def remove_outliers_zscore(df, columns, threshold=3):
     z_scores = np.abs(stats.zscore(df[columns]))
