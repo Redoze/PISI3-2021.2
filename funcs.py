@@ -159,8 +159,7 @@ def carrega_df(nome_df):
         return merged_dataframe
 
     else:
-        file_path = os.path.join("data/df3/", nome_df)
-        df3 = pd.read_parquet(f'{file_path}/{nome_df}.parquet')
+        df3 = pd.read_parquet(f'data/df3/{nome_df}.parquet')
         return df3
     
     
