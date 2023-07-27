@@ -19,9 +19,9 @@ def build_header():
 
 def build_body():
     # Carrega os dataframes
-    df = load_csv()
-    df_tags = load_csv2()
-    df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["appid", "name"])
+    df = carrega_df('df1')
+    df_tags = carrega_df('df2')
+    df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["app_id_df2", "app_name_df2"])
 
     st.sidebar.subheader("Use os filtros para exploração de dados:")
 
@@ -42,13 +42,19 @@ def build_body():
 
     if selected_graph == "Nuvem de palavras":
         st.subheader("Nuvem de palavras")
-        st.write('')
+        if not selected_games:
+            selected_games = df['app_name'].unique()
+
+        filtered_data_2 = df[(df["app_name"].isin(selected_games))]
         text = " ".join(review for review in filtered_data.review_text)
-        wordcloud = WordCloud(max_words=100, background_color="white").generate(text)
-        plt.imshow(wordcloud, interpolation='bilinear')
-        plt.axis("off")
-        st.pyplot(plt.gcf())
-        st.write('Representação em formato de nuvem das palavras mais frequentes')
+        try:
+            wordcloud = WordCloud(max_words=100, background_color="black").generate(text)
+            plt.imshow(wordcloud, interpolation='bilinear')
+            plt.axis("off")
+            st.pyplot(plt.gcf())
+        except ValueError:
+            st.caption('Favor selecionar ao menos um jogo.')
+            pass
 
     elif selected_graph == "Histograma das 10 palavras mais frequentes":
         st.subheader('Histograma das 10 palavras mais frequentes')
