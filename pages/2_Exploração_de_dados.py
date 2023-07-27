@@ -52,7 +52,7 @@ def build_body():
             plt.axis("off")
             st.pyplot(plt.gcf())
         except ValueError:
-            st.caption('Favor selecionar ao menos um jogo.')
+            st.caption('Favor selecionar ao menos um jogo e um tipo de review.')
             pass
 
     elif selected_graph == "Histograma das 10 palavras mais frequentes":
