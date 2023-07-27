@@ -21,7 +21,6 @@ def build_body():
     # Carrega os dataframes
     df = carrega_df('df1')
     df_tags = carrega_df('df2')
-    df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["app_id_df2", "app_name_df2"])
 
     st.sidebar.subheader("Use os filtros para exploração de dados:")
 
