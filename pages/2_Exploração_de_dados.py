@@ -349,7 +349,7 @@ def build_body():
 
         grafvotes = px.scatter(mesclado_jogadores_indicacoes_df, x="review_votes", y="player_count",
                                title='Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis',
-                               labels={'review_votes':'Média de reviews indicadas como úteis (%)', 'contagem_jogadores':'Quantidade média de jogadores'},
+                               labels={'review_votes':'Média de reviews indicadas como úteis (%)', 'player_count':'Quantidade média de jogadores'},
                                hover_data=['app_name'],
                                color='review_votes',            
                                color_continuous_scale=[(0, "red"),(1, "green")])
