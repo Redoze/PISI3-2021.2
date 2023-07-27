@@ -29,7 +29,7 @@ def build_body():
     review_options = {"Negativa": -1, "Positiva": 1}
     graph_options = ["Nuvem de palavras", "Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
                      "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre classificações e tempo de jogo",
-                    "Correlação entre a polaridade média das reviews e a quantidade média de jogadores"]
+                    "Correlação entre a polaridade média das reviews e a quantidade média de jogadores","Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis"]
 
     # Usa o multiselect para definir as opções
     selected_games = st.sidebar.multiselect("Selecione o(s) jogo(s)", game_options)
