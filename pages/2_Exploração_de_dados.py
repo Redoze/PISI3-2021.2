@@ -275,9 +275,22 @@ def build_body():
 
         #df com a player count de cada jogo
         player_df = pd.DataFrame({'app_id': app_ids, 'app_name': app_names, 'player_count': player_counts})
-        #df com playercount e sentimentos
-        merged_player_sentimentos_df = pd.merge(med_polaridade.reset_index(), player_df, on='app_id')
 
+        #add um slider na sidebar para remoção de outliers
+        outlier_threshold = st.sidebar.slider('Descartar Outliers (Quantidade média de jogadores)', min_value=10000, max_value=999999, value=100000, step=5000)
+        
+
+        #df com a player count de cada jogo
+        player_df = pd.DataFrame({'app_id': app_ids, 'app_name': app_names, 'player_count': player_counts})
+        #remove outliers com mais do que o threshold
+        player_df_threshold = player_df[player_df["player_count"] > outlier_threshold]
+        #remove outliers com menos do que o threshold
+        player_df_threshold = player_df[player_df["player_count"] <= outlier_threshold]
+        
+        #df com playercount e sentimentos
+        merged_player_sentimentos_df = pd.merge(med_polaridade.reset_index(), player_df_threshold, on='app_id')
+        
+        st.write(merged_player_sentimentos_df)
         fig = px.scatter(merged_player_sentimentos_df, x="review_score", y="player_count",
                          title='Correlação entre a polaridade média das reviews e a quantidade média de jogadores',
                          labels={'review_score':'Média das reviews (%)', 'player_count':'Quantidade média de jogadores'},
