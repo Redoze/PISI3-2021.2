@@ -5,6 +5,7 @@ import random as rn
 from wordcloud import WordCloud
 import plotly.graph_objects as go
 from funcs import *
+import matplotlib.pyplot as plt
 
 # Configuração da página do Streamlit
 st.set_page_config(
