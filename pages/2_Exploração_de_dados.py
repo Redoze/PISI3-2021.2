@@ -303,6 +303,58 @@ def build_body():
                          color='review_score',            
                          color_continuous_scale=[(0, "red"),(1, "green")])
         st.plotly_chart(fig)
+    elif selected_graph == "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis":
+        
+        st.subheader("Gráfico de correlação: Quantidade média de Jogadores vs Quantidade média de reviews indicadas como úteis")
+
+        df6 = carrega_df('df1')
+        
+        if not selected_games:
+            selected_games = df6['app_name'].unique()
+
+        filtered_data_2 = df6[(df6["app_name"].isin(selected_games))]
+        
+        # Calcular a quantidade média de reviews indicadas como úteis por jogo
+        
+        reviews_indicadas = filtered_data_2.groupby('app_id')['review_votes'].sum()
+        reviews_totais = filtered_data_2.groupby('app_id')['review_votes'].count()
+        media_uteis = ((reviews_indicadas / reviews_totais) * 100).clip(lower=0)
+            
+        contagens_jogadores = []
+        jogos_ids = []
+        jogos_nomes = []
+            
+        # Carregar a quantidade de jogadores
+        
+        for app_id in media_uteis.index:
+            try:
+                dados_jogadores = carrega_df(app_id)
+                contagem_jogadores = dados_jogadores['Playercount'].mean()
+                contagens_jogadores.append(contagem_jogadores)
+                jogo_nome = filtered_data_2[filtered_data_2['app_id'] == app_id]['app_name'].values[0]
+                jogos_nomes.append(jogo_nome)
+                jogos_ids.append(app_id)
+            except FileNotFoundError:
+                pass
+
+        # Dataframe com a quantidade de jogadores de cada jogo
+            
+        jogadores_df = pd.DataFrame({'app_id': jogos_ids, 'app_name': jogos_nomes, 'player_count': contagens_jogadores})
+        
+        # Dataframe com a quantidade de jogadores e indicações de reviews
+        
+        mesclado_jogadores_indicacoes_df = pd.merge(media_uteis.reset_index(), jogadores_df, on='app_id')
+
+        st.write(mesclado_jogadores_indicacoes_df)
+
+        grafvotes = px.scatter(mesclado_jogadores_indicacoes_df, x="review_votes", y="player_count",
+                               title='Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis',
+                               labels={'review_votes':'Média de reviews indicadas como úteis (%)', 'contagem_jogadores':'Quantidade média de jogadores'},
+                               hover_data=['app_name'],
+                               color='review_votes',            
+                               color_continuous_scale=[(0, "red"),(1, "green")])
+
+        st.plotly_chart(grafvotes)
 
 def main():
     build_header()
