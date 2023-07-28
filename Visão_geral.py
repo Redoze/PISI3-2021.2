@@ -138,7 +138,10 @@ def tabela_dataframe_3():
         # Pega o id do jogo pelo nome do jogo selecionado anteriormente
         pega_id_do_jogo_procurado = chama_id_name_df2[chama_id_name_df2['app_name_df2'] == selectbox_jogo_em_app_name_df2]['app_id_df2'].iloc[0]
 
-        pega_df3 = carrega_df(pega_id_do_jogo_procurado)
+        try:
+            pega_df3 = carrega_df(pega_id_do_jogo_procurado)
+        except FileNotFoundError:
+            pass
         pega_df3.rename(columns={'Time': 'Período', 'Playercount': 'Contagem de jogadores'}, inplace=True)
 
     with coluna2_df3:
