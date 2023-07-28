@@ -29,7 +29,7 @@ def build_body():
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
     graph_options = ["Nuvem de palavras", "Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
-                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre classificações e tempo de jogo",
+                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre avaliações e tempo de jogo",
                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores","Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis"]
 
     # Usa o multiselect para definir as opções
@@ -173,24 +173,22 @@ def build_body():
         st.plotly_chart(fig_pizza)
         st.write("Representação gráfica da distribuição de reviews positivas e negativas")
 
-    elif selected_graph == "Relação entre classificações e tempo de jogo":
-        st.subheader("Relação entre classificações e tempo de jogo")
+    elif selected_graph == "Relação entre avaliações e tempo de jogo":
+        st.subheader("Relação entre avaliações e tempo de jogo")
 
         df5 = carrega_df('df2')
-        average_playtime = df5['average_playtime']
-        positive_ratings = df5['positive_ratings']
-        negative_ratings = df5['negative_ratings']
-        game_names = df5['app_name_df2']
-        genres = df5['genres']
 
         # Criando uma barra deslizante (slider) para o threshold
         threshold = st.slider("Selecione o valor para aumentar ou diminiur a quantidade de outliers", min_value=1, max_value=10, value=3, step=1)
+        
+        # Definindo as colunas relevantes para o gráfico
+        columns_for_graph = ['average_playtime', 'positive_ratings', 'negative_ratings']
 
         # Restante do código para detecção e remoção de outliers
         filtered_data = df5.copy()
 
         # Remove outliers usando Z-score para as colunas relevantes
-        filtered_data = remove_outliers_zscore(df5, ['average_playtime', 'positive_ratings', 'negative_ratings'],threshold=threshold)
+        filtered_data = remove_outliers_zscore(filtered_data, columns_for_graph,threshold=threshold)
 
          # Criando um botão para alternar entre mostrar e ocultar os outliers
         show_outliers = st.checkbox("Mostrar gráfico original com Outliers", value=False)
@@ -244,6 +242,7 @@ def build_body():
         )
         
         st.plotly_chart(fig)
+
     elif selected_graph == "Correlação entre a polaridade média das reviews e a quantidade média de jogadores":
         st.subheader("Gráfico de correlação: Polaridade média vs Quantidade média de Jogadores")
 
@@ -267,7 +266,7 @@ def build_body():
         app_ids = []
         app_names = []
         
-        #carregar os dados de contagemd e jogadores
+        #carregar os dados de contagem e jogadores
         for app_id in med_polaridade.index:
             try:
                 player_data = carrega_df(app_id)
@@ -304,6 +303,7 @@ def build_body():
                          color='review_score',            
                          color_continuous_scale=[(0, "red"),(1, "green")])
         st.plotly_chart(fig)
+
     elif selected_graph == "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis":
         
         st.subheader("Gráfico de correlação: Quantidade média de Jogadores vs Quantidade média de reviews indicadas como úteis")
@@ -315,7 +315,7 @@ def build_body():
 
         filtered_data_2 = df6[(df6["app_name"].isin(selected_games))]
         
-        # Calcular a quantidade média de reviews indicadas como úteis por jogo
+        # Calcula a quantidade média de reviews indicadas como úteis por jogo
         
         reviews_indicadas = filtered_data_2.groupby('app_id')['review_votes'].sum()
         reviews_totais = filtered_data_2.groupby('app_id')['review_votes'].count()

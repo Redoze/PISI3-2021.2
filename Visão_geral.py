@@ -93,7 +93,7 @@ def tabela_dataframe_1():
         pega_reviews = pega_reviews.reindex(columns = ordem_colunas)
 
     with coluna2_df1:
-        st.write('Todas as valiações de: ', selectbox_jogo_em_app_name_df2)
+        st.write('Todas as avaliações de: ', selectbox_jogo_em_app_name_df2)
         st.dataframe(pega_reviews, hide_index=True, width = 800) # Exibe apenas review_text e exclui a coluna de index
     
     with empty2:
