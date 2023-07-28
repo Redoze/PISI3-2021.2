@@ -116,8 +116,6 @@ def tabela_dataframe_2():
 
     st.dataframe(pega_df2, hide_index=True)
 
-    st.caption('Para realizar uma busca no dataframe, clique em uma coluna e precione as teclas CTRL + F.')
-
 def tabela_dataframe_3():
 
     st.write(f'''<p style='text-align: center; font-size: 18px'>
