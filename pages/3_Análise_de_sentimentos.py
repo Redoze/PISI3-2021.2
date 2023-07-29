@@ -107,15 +107,23 @@ positive_features = [feature_names[i] for i in np.argsort(coefs[pos_index])[::-1
 #Criar o wordcloud pra reviews positivas e negativas
 positive_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 1]["review_text"])
 negative_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 0]["review_text"])
-st.write(len(positive_text))
-positive_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(positive_text)
-negative_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(negative_text)
 
-st.subheader("Word cloud de reviews positivas")
-st.image(positive_wordcloud.to_image())
+# Verificar se o texto não está vazio antes de criar a nuvem de palavras
+if len(positive_text) > 0:
+    positive_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(positive_text)
+    st.subheader("Word cloud de reviews positivas")
+    st.image(positive_wordcloud.to_image())
+else:
+    st.subheader("Word cloud de reviews positivas")
+    st.write("Nenhuma review positiva encontrada para este jogo.")
 
-st.subheader("Word cloud de reviews negativas")
-st.image(negative_wordcloud.to_image())
+if len(negative_text) > 0:
+    negative_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(negative_text)
+    st.subheader("Word cloud de reviews negativas")
+    st.image(negative_wordcloud.to_image())
+else:
+    st.subheader("Word cloud de reviews negativas")
+    st.write("Nenhuma review negativa encontrada para este jogo.")
 
 try:
     #Carrega os dados de contagem de jogadores para o jogo selecionado
