@@ -82,10 +82,10 @@ def build_body():
 
         histograma_sentimentos = go.Figure(data=[
             go.Bar(
-                x=['Negativa', 'Positiva'],
+                x=['Positiva', 'Negativa'],
                 y=coluna_review_score.value_counts().tolist(),
                 marker=dict(
-                    color=['#FF4136', '#2ECC40'],
+                    color=['#2ECC40', '#FF4136'],
                     line=dict(color='#000000', width=1)
                 )
             )
