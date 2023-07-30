@@ -15,7 +15,7 @@ def build_header():
              >Análise de sentimentos em avaliações de jogos na Steam<br><br></h1>
              ''', unsafe_allow_html=True)
     
-    st.write(f'''<h2 style='text-align: center; font-size: 20px'>
+    st.write(f'''<h2 style='text-align: center; font-size: 18px'>
     PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br></h2>
         ''', unsafe_allow_html=True)
     st.markdown("---")
@@ -84,11 +84,12 @@ def tabela_dataframe_1():
         # Encontra todas as linhas de chama_df1 com o mesmo valor de id encontrado acima
         pega_reviews = chama_df1.loc[chama_df1['app_id'] == pega_id_do_jogo_procurado]
         # Renomeia a coluna, precisou do inplace=True para aplicar a renoeação diretamente no df a menos que seja feita uma nova variavel para tal
-        pega_reviews.rename(columns = {'review_text': 'Avaliações', }, inplace=True)
+        pega_reviews.rename(columns = {'review_text': 'Avaliações', 'review_score': 'Avaliação do jogo', 
+                                       'review_votes': 'Avaliação recomendada'}, inplace=True)
         del pega_reviews['app_id']
         del pega_reviews['app_name']
 
-        ordem_colunas = ['Avaliações', 'review_score', 'review_votes']
+        ordem_colunas = ['Avaliações', 'Avaliação do jogo', 'Avaliação recomendada']
         # Reordenar as colunas do DataFrame
         pega_reviews = pega_reviews.reindex(columns = ordem_colunas)
 
@@ -137,16 +138,24 @@ def tabela_dataframe_3():
         chama_id_name_df2 = mistura_colunas('app_id_df2','app_name_df2')
         # Pega o id do jogo pelo nome do jogo selecionado anteriormente
         pega_id_do_jogo_procurado = chama_id_name_df2[chama_id_name_df2['app_name_df2'] == selectbox_jogo_em_app_name_df2]['app_id_df2'].iloc[0]
+        var = 0
 
         try:
             pega_df3 = carrega_df(pega_id_do_jogo_procurado)
+            pega_df3.rename(columns={'Time': 'Período', 'Playercount': 'Contagem de jogadores'}, inplace=True)
+            var += 1
+
         except FileNotFoundError:
             pass
-        pega_df3.rename(columns={'Time': 'Período', 'Playercount': 'Contagem de jogadores'}, inplace=True)
 
     with coluna2_df3:
-        st.write(selectbox_jogo_em_app_name_df2)
-        st.dataframe(pega_df3, hide_index=True) # Exibe apenas review_text e exclui a coluna de index
+
+        if var == 0:
+            st.warning(f'{selectbox_jogo_em_app_name_df2} não possui referências no conjunto de dados 3, por favor, escolha outro jogo.')
+
+        else:
+            st.write(selectbox_jogo_em_app_name_df2)
+            st.dataframe(pega_df3, hide_index=True) # Exibe apenas review_text e exclui a coluna de index
     
     with empty2:
         st.empty()
