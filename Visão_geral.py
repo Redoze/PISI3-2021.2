@@ -2,6 +2,7 @@ import streamlit as st
 from funcs import *
 from collections import Counter
 from streamlit_extras.keyboard_text import key
+import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="Análise de sentimentos em avaliações de jogos na Steam",
@@ -222,6 +223,66 @@ def build_container():
     with empty2:
         st.empty()
 
+def build_metodo_vendas():
+    st.markdown("---")
+    st.write(f'''<h2 style='text-align: center'
+             >Avaliação do método de vendas</h2>
+             ''', unsafe_allow_html=True)
+    st.text("")   
+    
+    empty1, graph_units_sold, empty2 = st.columns([4,10,4])
+    
+    with empty1:
+        st.empty()
+        
+        
+    with graph_units_sold:
+    
+        units_sold = pd.read_csv("data/vgsales_limpo.csv")
+        
+        carrega_df1_name = carrega_coluna('app_name')
+        
+        def calculate_nb_number(reviews, year):
+            adjusted_reviews = reviews.copy()
+            
+            adjusted_reviews.loc[year <2014] *=600
+            adjusted_reviews.loc[(year >=2014) & (year<2016)]*=500
+            adjusted_reviews.loc[(year >=2016) & (year<2018)]*=400
+            adjusted_reviews.loc[(year >=2018) & (year<2020)] *=350
+            adjusted_reviews.loc[year >=2020]*=300
+            
+            return adjusted_reviews
+    
+        reviews_count = carrega_df1_name.groupby('app_name').size().reset_index(name='reviews')
+        
+        merge_review_counts = pd.merge(units_sold, reviews_count, left_on='Name', right_on='app_name')
+        review_year = merge_review_counts['Year']
+
+        adjusted_reviews_df = calculate_nb_number(merge_review_counts['reviews'], review_year)
+        
+        merge_review_counts['NB_number'] = adjusted_reviews_df
+        #st.write(merge_review_counts)
+        
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=merge_review_counts['app_name'], y=merge_review_counts['Global_Sales'],
+                            mode='lines+markers', name='Unidades Vendidas (em milhões)',
+                    line=dict(color='red', width=1), marker=dict(symbol='circle', color ='red', size = 4)))
+        fig.add_trace(go.Scatter(x=merge_review_counts['app_name'], y=merge_review_counts['NB_number'],
+                            mode='lines+markers', name='Número de Unidades Estimado (Método NB-Number)  (em milhões)',
+                    line=dict(color='green', width=1), marker=dict(symbol='circle', color ='green', size = 4)))
+        fig.update_layout(
+            title='Número Real de Vendas vs Número Estimado',
+            width=1250,
+            height=800
+        )
+        st.plotly_chart(fig)
+    
+    with empty2:
+        st.empty()
+
+
 build_header()
 build_body()
 build_container()
+build_metodo_vendas()
