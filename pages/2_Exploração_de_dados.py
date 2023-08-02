@@ -176,26 +176,28 @@ def build_body():
     elif selected_graph == "Relação entre avaliações e tempo de jogo":
         st.subheader("Relação entre avaliações e tempo de jogo")
 
-        df5 = carrega_df('df2')
+        # Carrega apenas as colunas necessárias do DataFrame
+        columns_to_load = ['app_name_df2', 'genres', 'average_playtime', 'positive_ratings', 'negative_ratings']
+        df_columns = [carrega_coluna(col) for col in columns_to_load]
 
         # Criando uma barra deslizante (slider) para o threshold
-        threshold = st.slider("Selecione o valor para aumentar ou diminiur a quantidade de outliers", min_value=1, max_value=10, value=3, step=1)
+        threshold = st.slider("Selecione o valor para aumentar ou diminiur a quantidade de outliers", min_value=1, max_value=30, value=3, step=1)
         
         # Definindo as colunas relevantes para o gráfico
         columns_for_graph = ['average_playtime', 'positive_ratings', 'negative_ratings']
 
         # Restante do código para detecção e remoção de outliers
-        filtered_data = df5.copy()
+        filtered_data = pd.concat(df_columns, axis=1)
 
         # Remove outliers usando Z-score para as colunas relevantes
         filtered_data = remove_outliers_zscore(filtered_data, columns_for_graph,threshold=threshold)
 
          # Criando um botão para alternar entre mostrar e ocultar os outliers
-        show_outliers = st.checkbox("Mostrar gráfico original com Outliers", value=False)
+        show_outliers = st.checkbox("Desmarque para mostrar o gráfico sem Outliers", value=True)
 
         if show_outliers:
             # Mostrar o gráfico com outliers
-            data_to_plot = df5
+            data_to_plot = pd.concat(df_columns, axis=1)
         else:
             # Mostrar o gráfico sem outliers
             data_to_plot = filtered_data
