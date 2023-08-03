@@ -12,7 +12,7 @@ def build_header():
     st.title('Sobre')
     st.text("")
     st.write('**Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III - 2022.2 do curso de Bacharelado em Sistemas de Informação (BSI).**')
-    st.write('**Grupo: GGJJLM**')
+    st.write('**Grupo: GGJJM**')
     st.text("")
 
 def build_body():
@@ -31,8 +31,6 @@ def build_body():
     with col2:
         func_mention(" José Francisco de Medeiros", 
                     "github", "https://github.com/Redoze")
-        func_mention(" Leonardo de Sousa Araújo Alcântara", 
-                    "github", "https://github.com/lsaa")
         func_mention(" Marcos de Oliveira de Jesus", 
                     "github", "https://github.com/Markie98")
 
