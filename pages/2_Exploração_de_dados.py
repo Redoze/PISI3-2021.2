@@ -28,7 +28,7 @@ def build_body():
     # Define os itens a serem selecionados na lista dropdown
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
-    graph_options = ["Nuvem de palavras", "Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
+    graph_options = ["Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
                      "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre avaliações e tempo de jogo",
                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores","Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis"]
 
@@ -39,22 +39,6 @@ def build_body():
 
     # Cria um dataframe de dados filtrados baseados nas opções selecionadas
     filtered_data = df[(df["app_name"].isin(selected_games)) & (df["review_score"].isin([review_options[review] for review in selected_reviews]))]
-
-    if selected_graph == "Nuvem de palavras":
-        st.subheader("Nuvem de palavras")
-        if not selected_games:
-            selected_games = df['app_name'].unique()
-
-        filtered_data_2 = df[(df["app_name"].isin(selected_games))]
-        text = " ".join(review for review in filtered_data.review_text)
-        try:
-            wordcloud = WordCloud(max_words=100, background_color="black").generate(text)
-            plt.imshow(wordcloud, interpolation='bilinear')
-            plt.axis("off")
-            st.pyplot(plt.gcf())
-        except ValueError:
-            st.caption('Favor selecionar ao menos um jogo e um tipo de review.')
-            pass
 
     elif selected_graph == "Histograma das 10 palavras mais frequentes":
         st.subheader('Histograma das 10 palavras mais frequentes')
