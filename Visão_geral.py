@@ -62,7 +62,7 @@ def build_body():
 def tabela_dataframe_1():
 
     st.write(f'''<p style='text-align: center; font-size: 18px'>
-                 <br>PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br><br></p>
+                 <br>A tabela abaixo apresenta palavras-chave extraídas dos corpo das avaliações dos jogos, assim como o estado da avaliação em si (positiva ou negativa), e o indicador de avaliação recomendada por terceiros. Dados provenientes do primeiro dataframe.<br><br></p>
                  ''', unsafe_allow_html=True)
 
     empty1, coluna1_df1, coluna2_df1, empty2 = st.columns([2,2,6,1], gap="large")
@@ -104,7 +104,7 @@ def tabela_dataframe_1():
 def tabela_dataframe_2():
 
     st.write(f'''<p style='text-align: center; font-size: 18px'>
-                 <br>A tabela abaixo apresenta os dados gerais dos jogos utilizados durante o trabalho. Esses dados são provenientes apenas do segundo dataframe.<br><br></p>
+                 <br>A tabela abaixo apresenta os dados gerais dos jogos, tais como data de lançamento, desenvolvedora, gênero, etc. Dados provenientes do segundo dataframe.<br><br></p>
                  ''', unsafe_allow_html=True)
 
     pega_df2 = carrega_df('df2')
@@ -121,7 +121,7 @@ def tabela_dataframe_2():
 def tabela_dataframe_3():
 
     st.write(f'''<p style='text-align: center; font-size: 18px'>
-            <br>PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br><br></p>
+            <br>A tabela abaixo apresenta dados de contagem de jogadores através do tempo, dentro de um intervalo de aproximadamente 2 a 3 anos (2017-2020), para uma quantidade limitada de jogos. Dados provenientes do terceiro dataframe.<br><br></p>
             ''', unsafe_allow_html=True)
 
     empty1, coluna1_df3, coluna2_df3, empty2 = st.columns([5,2,6,1], gap="large")
