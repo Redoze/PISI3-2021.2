@@ -17,7 +17,7 @@ def build_header():
              ''', unsafe_allow_html=True)
     
     st.write(f'''<h2 style='text-align: center; font-size: 18px'>
-    PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br></h2>
+    Visão geral dos conjuntos de dados, estatísticas gerais dos conjuntos de dados, e avaliação do método de vendas dos jogos nos conjuntos de dados a partir de 3 conjuntos de dados complementares interligados.<br></h2>
         ''', unsafe_allow_html=True)
     st.markdown("---")
 
