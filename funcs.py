@@ -6,6 +6,37 @@ import re
 import numpy as np
 from scipy import stats
 
+# Versão antiga de leitura dos dataframes. Ignorem e passem a usar a nova versão mais abaixo.
+@st.cache_resource
+def load_csv():
+    p = 0.01
+    url = "https://www.dropbox.com/s/fy4cffn16usarzk/Dataset_limpo.csv?raw=1"
+    try:
+        df = pd.read_csv(url, skiprows=lambda i: i>0 and rn.random() > p)
+    except Exception as e:
+        error_msg = "Erro ao carregar arquivo CSV"
+        st.write(error_msg)
+        raise Exception(error_msg)
+    return df
+
+@st.cache_resource
+def load_csv2(): 
+    url = "https://www.dropbox.com/s/f7lmv645avnajkd/steam.csv?raw=1"
+    try:
+        df_tags = pd.read_csv(url)
+    except Exception as e:
+        error_msg = "Erro ao carregar arquivo CSV"
+        st.write(error_msg)
+        raise Exception(error_msg)
+    return df_tags
+
+@st.cache_data
+def load_csv3(gameid):
+    df_time = pd.read_csv("pages/PlayerCountHistory/{}.csv".format(gameid))
+    return df_time
+
+#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
 # Os dataframes foram divididos pelas suas colunas, agora cada coluna passou a ser um arquivo independente que também foi
 # convertido para o formato parquet.
 # Os principais dados do projeto estão contidos na coluna "review_text" do dataframe 1. Pelo seu tamanho ser muito elevado,
