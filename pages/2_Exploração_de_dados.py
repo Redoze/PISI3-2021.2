@@ -28,7 +28,7 @@ def build_body():
     # Define os itens a serem selecionados na lista dropdown
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
-    graph_options = ["Nuvem de palavras", "Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
+    graph_options = ["Nuvem de palavras", "Histograma de sentimentos",
                      "Histograma de contagem de reviews recomendados por sentimento", "Relação entre avaliações e tempo de jogo",
                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores","Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis"]
 
@@ -55,23 +55,6 @@ def build_body():
         except ValueError:
             st.caption('Favor selecionar ao menos um jogo e um tipo de review.')
             pass
-
-    elif selected_graph == "Histograma das 10 palavras mais frequentes":
-        st.subheader('Histograma das 10 palavras mais frequentes')
-        st.write('')
-        # Dataframe que contém a contagem de cada palavra nas reviews
-        word_counts = filtered_data["review_text"].str.split(expand=True).stack().value_counts().reset_index()
-        word_counts.columns = ["word", "count"]
-        top_words = word_counts.sort_values("count", ascending=False).head(10)
-
-        plt.figure(figsize=(12, 6))
-        ax = top_words.plot(kind="bar", x="word", y="count", rot=45)
-        ax.set_xlabel("Palavras", fontsize=16)
-        ax.set_ylabel("Contagem", fontsize=16)
-        ax.tick_params(axis='both', which='major', labelsize=12, pad=8)
-        plt.tight_layout()
-        st.pyplot(plt.gcf())
-        st.write('Representação gráfica das 10 palavras mais frequentes')
 
     elif selected_graph == "Histograma de sentimentos":
         st.subheader("Histograma de sentimentos")
