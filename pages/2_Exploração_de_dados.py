@@ -29,7 +29,7 @@ def build_body():
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
     graph_options = ["Histograma das 10 palavras mais frequentes", "Histograma de sentimentos",
-                     "Histograma de contagem de reviews recomendados por sentimento", "Gráfico de pizza de distribuição de sentimentos", "Relação entre avaliações e tempo de jogo",
+                     "Histograma de contagem de reviews recomendados por sentimento", "Relação entre avaliações e tempo de jogo",
                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores","Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis"]
 
     # Usa o multiselect para definir as opções
@@ -119,43 +119,6 @@ def build_body():
 
         st.plotly_chart(barras_agrupadas)
         st.write("Representação gráfica da contagem de reviews recomendadas e não recomendadas por sentimento")
-
-
-    elif selected_graph == "Gráfico de pizza de distribuição de sentimentos":
-        st.subheader("Gráfico de pizza de distribuição de sentimentos")
-
-        # Carregar a coluna "review_score" do arquivo Parquet
-        df1_sentiment = carrega_coluna('review_score')
-
-        # Contar a quantidade de reviews positivas e negativas
-        positivas = df1_sentiment[df1_sentiment['review_score'] == 1].shape[0]
-        negativas = df1_sentiment[df1_sentiment['review_score'] == -1].shape[0]
-
-        # Criar o gráfico de pizza com cores ilustrativas
-        fig_pizza = go.Figure()
-
-        fig_pizza.add_trace(go.Pie(
-            labels=['Negativas', 'Positivas'],
-            values=[negativas, positivas],
-            marker_colors=['red', 'green'],
-            hole=0.3,
-        ))
-
-        fig_pizza.update_traces(marker=dict(colors=['red', 'green']))
-
-        fig_pizza.update_layout(
-            title="Distribuição de Reviews Positivas e Negativas",
-            legend=dict(
-                x=1.1,
-                y=0.5,
-                title="Sentimento",
-                title_font=dict(size=14),
-                itemsizing='constant'
-            )
-        )
-
-        st.plotly_chart(fig_pizza)
-        st.write("Representação gráfica da distribuição de reviews positivas e negativas")
 
     elif selected_graph == "Relação entre avaliações e tempo de jogo":
         st.subheader("Relação entre avaliações e tempo de jogo")
