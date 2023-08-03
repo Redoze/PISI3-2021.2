@@ -40,7 +40,7 @@ def build_body():
     # Cria um dataframe de dados filtrados baseados nas opções selecionadas
     filtered_data = df[(df["app_name"].isin(selected_games)) & (df["review_score"].isin([review_options[review] for review in selected_reviews]))]
 
-    elif selected_graph == "Histograma das 10 palavras mais frequentes":
+    if selected_graph == "Histograma das 10 palavras mais frequentes":
         st.subheader('Histograma das 10 palavras mais frequentes')
         st.write('')
         # Dataframe que contém a contagem de cada palavra nas reviews
