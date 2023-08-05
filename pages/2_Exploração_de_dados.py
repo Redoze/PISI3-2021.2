@@ -1,7 +1,5 @@
-import numpy as np
 import plotly.express as px
 import streamlit as st
-import random as rn
 from wordcloud import WordCloud
 import plotly.graph_objects as go
 from funcs import *
@@ -11,52 +9,127 @@ import matplotlib.pyplot as plt
 st.set_page_config(
     page_title="Exploração de dados",
     page_icon="🔎",
-    layout="centered",
+    layout="wide",
 )
 
 def build_header():
-    st.title("Exploração de dados dos jogos na Steam")
+    st.write(f'''<h1 style='text-align: center'>
+             Exploração de dados<br><br></h1>''', unsafe_allow_html=True)
+    
+    st.write(f'''<h2 style='text-align: center; font-size: 18px'>
+             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br></h2>''', unsafe_allow_html=True)
     st.markdown("---")
 
 def build_body():
+    st.write(f'''<h2 style='text-align: center; font-size: 28px'>
+            Utilize os filtros para explorar os dados<br></h2>''', unsafe_allow_html=True) # 28px aprox. tamanho do subheader
+        
     # Carrega os dataframes
     df = carrega_df('df1')
-    df_tags = carrega_df('df2')
-
-    st.sidebar.subheader("Use os filtros para exploração de dados:")
 
     # Define os itens a serem selecionados na lista dropdown
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
-    graph_options = ["Nuvem de palavras", "Histograma de sentimentos",
-                     "Histograma de contagem de reviews recomendados por sentimento", "Relação entre avaliações e tempo de jogo",
-                    "Correlação entre a polaridade média das reviews e a quantidade média de jogadores","Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis"]
+    graph_options = {"Nuvem de palavras": 'grafico_1',}
+                    #  "Histograma de sentimentos": 'grafico_2',
+                    #  "Histograma de contagem de reviews recomendados por sentimento": 'grafico_3', 
+                    #  "Relação entre avaliações e tempo de jogo": 'grafico_4', 
+                    #  "Correlação entre a polaridade média das reviews e a quantidade média de jogadores": 'grafico_5', 
+                    #  "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis": 'grafico_6'}
+    
+    def inicia_grafico(posicao):
+        # Cria um dataframe de dados filtrados baseados nas opções selecionadas
+        filtered_data = df[(df["app_name"].isin(selected_games)) & (df["review_score"].isin([review_options[review] for review in selected_reviews]))]
+        
+        for nome_funcao, graficos in graph_options.items():
+            if nome_funcao == selected_graph[posicao]:
+                chama_funcao = globals()[graficos]
+                # Antenção com o tipo de 
+                chama_funcao(df, selected_games, selected_reviews, filtered_data)
 
-    # Usa o multiselect para definir as opções
-    selected_games = st.sidebar.multiselect("Selecione o(s) jogo(s)", game_options)
-    selected_reviews = st.sidebar.multiselect("Selecione o tipo de review", list(review_options.keys()))
-    selected_graph = st.sidebar.selectbox("Selecione o gráfico", graph_options)
+    ############################################################ - ############################################################
 
-    # Cria um dataframe de dados filtrados baseados nas opções selecionadas
-    filtered_data = df[(df["app_name"].isin(selected_games)) & (df["review_score"].isin([review_options[review] for review in selected_reviews]))]
+    vazio_1, coluna_1, vazio_2 = st.columns(3)
 
-    if selected_graph == "Nuvem de palavras":
-        st.subheader("Nuvem de palavras")
-        if not selected_games:
-            selected_games = df['app_name'].unique()
+    with vazio_1:
+        st.empty()
 
-        filtered_data_2 = df[(df["app_name"].isin(selected_games))]
-        text = " ".join(review for review in filtered_data.review_text)
-        try:
-            wordcloud = WordCloud(max_words=100, background_color="black").generate(text)
-            plt.imshow(wordcloud, interpolation='bilinear')
-            plt.axis("off")
-            st.pyplot(plt.gcf())
-        except ValueError:
-            st.caption('Favor selecionar ao menos um jogo e um tipo de review.')
-            pass
+    with coluna_1:
+        selected_graph = st.multiselect("Selecione um gráfico: ", graph_options, max_selections = 3)
 
-    elif selected_graph == "Histograma de sentimentos":
+    with vazio_2:
+        st.empty()
+    
+    ############################################################ - ############################################################
+
+    vazio_1_lv_2, coluna_1_lv_2, coluna_2_lv_2, vazio_2_lv_2 = st.columns([3,2,2,3])
+
+    with vazio_1_lv_2:
+        st.empty()
+            
+    with coluna_1_lv_2:
+        # Usa o multiselect para definir as opções
+        selected_games = st.multiselect("Selecione o(s) jogo(s)", game_options)
+        
+    with coluna_2_lv_2:
+        selected_reviews = st.multiselect("Selecione o tipo de review", list(review_options.keys()))
+    
+    with vazio_2_lv_2:
+        st.empty()
+
+    ################################################## Exibição dos gráficos ##################################################
+
+    if len(selected_graph) == 1:
+        vazio_1_lv_3, coluna_1_lv_3, vazio_2_lv_3 = st.columns(3)
+
+        with vazio_1_lv_3:
+            st.empty()
+
+        with coluna_1_lv_3:
+            inicia_grafico(0)
+            
+        with vazio_2_lv_3:
+            st.empty() 
+           
+    if len(selected_graph) == 2:
+        vazio_1_lv_3, coluna_1_lv_3, coluna_2_lv_3, vazio_2_lv_3 = st.columns([1,5,5,1], gap = "large")
+
+        with vazio_1_lv_3:
+            st.empty()
+
+        with coluna_1_lv_3:
+            inicia_grafico(0)
+        
+        with coluna_2_lv_3:
+            inicia_grafico(1)
+            
+        with vazio_2_lv_3:
+            st.empty()
+
+######################################################### GRÁFICOS ########################################################
+
+def grafico_1(df, selected_games, selected_reviews, filtered_data):
+
+    st.write(f'''<h3 style='text-align: center'><br>
+        Nuvem de palavras<br><br></h3>
+            ''', unsafe_allow_html=True)
+    
+    if not selected_games:
+        selected_games = df['app_name'].unique()
+
+    filtered_data_2 = df[(df["app_name"].isin(selected_games))]
+    text = " ".join(review for review in filtered_data.review_text)
+    try:
+        wordcloud = WordCloud(max_words=100, background_color="black").generate(text)
+        plt.imshow(wordcloud, interpolation='bilinear')
+        plt.axis("off")
+        st.pyplot(plt.gcf())
+    except ValueError:
+        st.caption('Favor selecionar ao menos um jogo e um tipo de review.')
+        pass
+
+    selected_graph = 'PASSAR GRÀFICOS PARA FUNÇÂO ASSIM COMO NA LINHA >>> 34 <<< E AJUSTAR OS OUTROS ERROS CONFORME DISCORD'
+    if selected_graph == "Histograma de sentimentos":
         st.subheader("Histograma de sentimentos")
         st.write('')
 
