@@ -30,12 +30,11 @@ def build_body():
     # Define os itens a serem selecionados na lista dropdown
     game_options = df["app_name"].unique()
     review_options = {"Negativa": -1, "Positiva": 1}
-    graph_options = {"Nuvem de palavras": 'grafico_1',}
-                    #  "Histograma de sentimentos": 'grafico_2',
-                    #  "Histograma de contagem de reviews recomendados por sentimento": 'grafico_3', 
-                    #  "Relação entre avaliações e tempo de jogo": 'grafico_4', 
-                    #  "Correlação entre a polaridade média das reviews e a quantidade média de jogadores": 'grafico_5', 
-                    #  "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis": 'grafico_6'}
+    graph_options = {"Nuvem de palavras": 'grafico_1',
+                     "Histograma de contagem de reviews recomendados por sentimento": 'grafico_2', 
+                     "Relação entre avaliações e tempo de jogo": 'grafico_3', 
+                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores": 'grafico_4', 
+                     "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis": 'grafico_5'}
     
     def inicia_grafico(posicao):
         # Cria um dataframe de dados filtrados baseados nas opções selecionadas
