@@ -17,7 +17,7 @@ def build_header():
              Exploração de dados<br><br></h1>''', unsafe_allow_html=True)
     
     st.write(f'''<h2 style='text-align: center; font-size: 18px'>
-             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br></h2>''', unsafe_allow_html=True)
+             Investigação e análise dos conjuntos de dados - Visualização dos dados, detecção de padrões, identificação de outliers, etc.<br></h2>''', unsafe_allow_html=True)
     st.markdown("---")
 
 def build_body():
