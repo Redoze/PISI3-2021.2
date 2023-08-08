@@ -5,70 +5,72 @@ from streamlit_extras.keyboard_text import key
 import plotly.graph_objects as go
 
 st.set_page_config(
-    page_title="Análise de sentimentos em avaliações de jogos na Steam",
+    page_title="Visão geral",
     page_icon="✅",
     layout="wide",
 )
 
 def build_header():
 
-    st.write(f'''<h1 style='text-align: center'
-             >Análise de sentimentos em avaliações de jogos na Steam<br><br></h1>
+    st.write(f'''<h1 style='text-align: center'>
+             Análise de sentimentos em avaliações de jogos na Steam<br></h1>
              ''', unsafe_allow_html=True)
     
-    st.write(f'''<h2 style='text-align: center; font-size: 18px'>
-    Visão geral dos conjuntos de dados, estatísticas gerais dos conjuntos de dados, e avaliação do método de vendas dos jogos nos conjuntos de dados a partir de 3 conjuntos de dados complementares interligados.<br></h2>
-        ''', unsafe_allow_html=True)
+    st.write(f'''<p style='text-align: center'>
+            <br>Visão geral dos conjuntos de dados, estatísticas gerais dos conjuntos de dados, e avaliação do método de vendas dos jogos nos conjuntos de dados a partir de 3 conjuntos de dados complementares interligados.<br></p>
+            ''', unsafe_allow_html=True)
     st.markdown("---")
 
-def build_body():
+def build_dataframes():
 
     st.write(f'''<h2 style='text-align: center; font-size: 36px'>
-            Visão geral do conjunto de dados</h2>
+            Visão geral dos conjuntos de dados<br><br></h2>
              ''', unsafe_allow_html=True) # 36px equivalem ao h2/subheader
-    st.text("")
 
-    font_css = """
-    <style>
-    button[data-baseweb="tab"] > div[data-testid="stMarkdownContainer"] > p {
-    font-size: 18px; } </style>""" # Define o tamanho da fonte do texto das tabelas.
+    # Inicializa a variável 'var' na sessão
+    if "var" not in st.session_state:
+        st.session_state.var = 1
 
-    st.write(font_css, unsafe_allow_html=True)
-    
-    def center_text_with_em_spaces(text, whitespace):
-        return text.center(whitespace, "\u2001")
+    # Originalmente estavamos usando tabs com css para exibir o layout de forma centralizada, porém não estava funcionando corretamente em resoluções diferentes.
+    # Então, o uso de colunas apresentadas abaixo propoem o mesmo "efeito".
+    col1, col2, col3, col4, col5 = st.columns([2,1,1,1,2])
 
-    # Defina a lista de rótulos das abas
-    listTabs = ["Conjunto de dados 1", "Conjunto de dados 2", "Conjunto de dados 3"]
+    with col1:
+        pass
+    with col2:
+        if st.button("Conjunto de dados 1", help= 'Exibe o contéudo do dataframe 1'):
+            st.session_state.var = 1
+    with col3 :
+        if st.button("Conjunto de dados 2", help= 'Exibe o contéudo do dataframe 2'):
+            st.session_state.var = 2
+    with col4:
+        if st.button("Conjunto de dados 3", help= 'Exibe o contéudo do dataframe 3'):
+            st.session_state.var = 3
+    with col5:
+        pass
 
-    # Defina o tamanho desejado para preenchimento e centralização
-    whitespace = 48
+    container = st.container()
 
-    # Centraliza os rótulos das abas sem usar um loop for
-    centered_tabs = [center_text_with_em_spaces(s, whitespace) for s in listTabs]
-
-    # Cria as tabelas para exibição dos dataframes
-    dataframe_1, dataframe_2, dataframe_3 = st.tabs(centered_tabs)
-
-    with dataframe_1:
-        tabela_dataframe_1()
-
-    with dataframe_2:
-        tabela_dataframe_2()
-        
-    with dataframe_3:
-        tabela_dataframe_3()
+    if st.session_state.var == 1:
+        with container:
+            tabela_dataframe_1()
+    elif st.session_state.var == 2:
+        with container:
+            tabela_dataframe_2()
+    elif st.session_state.var == 3:
+        with container:
+            tabela_dataframe_3()
 
 def tabela_dataframe_1():
 
-    st.write(f'''<p style='text-align: center; font-size: 18px'>
+    st.write(f'''<p style='text-align: center'>
                  <br>A tabela abaixo apresenta palavras-chave extraídas dos corpo das avaliações dos jogos, assim como o estado da avaliação em si (positiva ou negativa), e o indicador de avaliação recomendada por terceiros. Dados provenientes do primeiro dataframe.<br><br></p>
                  ''', unsafe_allow_html=True)
 
-    empty1, coluna1_df1, coluna2_df1, empty2 = st.columns([2,2,6,1], gap="large")
+    empty1, coluna1_df1, coluna2_df1, empty2 = st.columns([1,2,6,1], gap="medium")
 
     with empty1:
-        st.empty()
+        pass
 
     with coluna1_df1:
 
@@ -99,11 +101,11 @@ def tabela_dataframe_1():
         st.dataframe(pega_reviews, hide_index=True, width = 800) # Exibe apenas review_text e exclui a coluna de index
     
     with empty2:
-        st.empty()
+        pass
 
 def tabela_dataframe_2():
 
-    st.write(f'''<p style='text-align: center; font-size: 18px'>
+    st.write(f'''<p style='text-align: center'>
                  <br>A tabela abaixo apresenta os dados gerais dos jogos, tais como data de lançamento, desenvolvedora, gênero, etc. Dados provenientes do segundo dataframe.<br><br></p>
                  ''', unsafe_allow_html=True)
 
@@ -120,14 +122,14 @@ def tabela_dataframe_2():
 
 def tabela_dataframe_3():
 
-    st.write(f'''<p style='text-align: center; font-size: 18px'>
+    st.write(f'''<p style='text-align: center'>
             <br>A tabela abaixo apresenta dados de contagem de jogadores através do tempo, dentro de um intervalo de aproximadamente 2 a 3 anos (2017-2020), para uma quantidade limitada de jogos. Dados provenientes do terceiro dataframe.<br><br></p>
             ''', unsafe_allow_html=True)
 
-    empty1, coluna1_df3, coluna2_df3, empty2 = st.columns([5,2,6,1], gap="large")
+    empty1, coluna1_df3, coluna2_df3, empty2 = st.columns([4,2,6,1], gap="medium")
 
     with empty1:
-        st.empty()
+        pass
 
     with coluna1_df3:
 
@@ -159,15 +161,14 @@ def tabela_dataframe_3():
             st.dataframe(pega_df3, hide_index=True) # Exibe apenas review_text e exclui a coluna de index
     
     with empty2:
-        st.empty()
+        pass
 
-def build_container():
+def build_estatisticas_gerais():
 
     st.markdown("---")
-    st.write(f'''<h2 style='text-align: center'
-             >Estatísticas gerais dos conjuntos de dados</h2>
+    st.write(f'''<h2 style='text-align: center'>
+             Estatísticas gerais dos conjuntos de dados<br><br></h2>
              ''', unsafe_allow_html=True)
-    st.text("")
 
     empty1, coluna1, coluna2, empty2 = st.columns([4,2,2,4])
 
@@ -235,7 +236,6 @@ def build_metodo_vendas():
     with empty1:
         st.empty()
         
-        
     with graph_units_sold:
     
         units_sold = pd.read_csv("data/vgsales_limpo.csv")
@@ -283,6 +283,6 @@ def build_metodo_vendas():
 
 
 build_header()
-build_body()
-build_container()
+build_dataframes()
+build_estatisticas_gerais()
 build_metodo_vendas()
