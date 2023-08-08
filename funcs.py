@@ -162,7 +162,11 @@ def carrega_df(nome_df):
         df3 = pd.read_parquet(f'data/df3/{nome_df}.parquet')
         return df3
     
+
+def carrega_df_jogo(appid):
     
+    carrega_jogo_selecionado = df[df['app_id'] == appid]
+
 def remove_outliers_zscore(df, columns, threshold=3):
     z_scores = np.abs(stats.zscore(df[columns]))
     return df[(z_scores < threshold).all(axis=1)]
