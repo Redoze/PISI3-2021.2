@@ -54,7 +54,7 @@ def build_body():
         st.empty()
 
     with coluna_1:
-        selected_graph = st.multiselect("Selecione um gráfico: ", graph_options, max_selections = 2)
+        selected_graph = st.multiselect("Selecione um gráfico: ", graph_options, max_selections = 1)  # DESATIVADO TEMPORARIAMENTE A OPÇÃO DE UTILIZAR 2 GRÁFICOS AO MESMO TEMPO
 
     with vazio_2:
         st.empty()
@@ -274,17 +274,18 @@ def grafico_4(df, selected_games, selected_reviews, filtered_data):
     st.write(f'''<h3 style='text-align: center'><br>
         Correlação entre a polaridade média das reviews e a quantidade média de jogadores<br><br></h3>
             ''', unsafe_allow_html=True)
-    
-    if selected_games[0] == None:
-        st.write('Selecione um Jogo, ou remova a opção "None" para o filtro utilizar toda base de dados')
+
+    texto = 'Selecione alguns jogos para explorar os dados'
+    if  len(selected_games) >= 1 and selected_games[0] == None:
+        st.write(texto)
         st.stop()
 
-    carrega_df1 = carrega_df('df1')
     if not selected_games:
-        selected_games = carrega_df1['app_name'].unique()
+        st.write(texto)
+        st.stop()
+        # selected_games = df['app_name'].unique()
 
-    filtered_data_2 = carrega_df1[(carrega_df1["app_name"].isin(selected_games))]
-    carrega_df1 = 0
+    filtered_data_2 = df[(df["app_name"].isin(selected_games))]
 
     #calcular a media de polaridade de reviews por jogo
     positivas = filtered_data_2.groupby('app_id')['review_score'].sum()
@@ -332,7 +333,7 @@ def grafico_4(df, selected_games, selected_reviews, filtered_data):
     
     # Apresentando erro no tratamento das colunas
     # merged_player_sentimentos_df.rename(columns = {'app_id': 'id', 'review_score': 'Avaliação do jogo', 'app_name': 'Nome do jogo',
-    #                                                'player_count': 'Contagem de jogadores'}, inplace=True)
+    #                                             'player_count': 'Contagem de jogadores'}, inplace=True)
 
     # Exibe a tabela com o dataframe
     st.dataframe(merged_player_sentimentos_df, hide_index=True,)
@@ -351,12 +352,16 @@ def grafico_5(df, selected_games, selected_reviews, filtered_data):
         Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis<br><br></h3>
             ''', unsafe_allow_html=True)
 
-    df6 = carrega_df('df1')
-    
-    if not selected_games:
-        selected_games = df6['app_name'].unique()
+    texto = 'Selecione alguns jogos para explorar os dados'
+    if  len(selected_games) >= 1 and selected_games[0] == None:
+        st.write(texto)
+        st.stop()
 
-    filtered_data_2 = df6[(df6["app_name"].isin(selected_games))]
+    if not selected_games:
+        st.write(texto)
+        st.stop()
+
+    filtered_data_2 = df[(df["app_name"].isin(selected_games))]
     
     # Calcula a quantidade média de reviews indicadas como úteis por jogo
     
