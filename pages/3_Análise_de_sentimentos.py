@@ -122,7 +122,7 @@ def modelo_1(df, selected_game, selected_model, df_filtered):
              ''', unsafe_allow_html=True)
     st.text("")
     
-    st.write("Numero total de reviews: ", len(df_filtered))
+    st.write("Número total de reviews: ", len(df_filtered))
     st.write("Pontuação média das reviews: ", round(df_filtered["review_score"].mean(), 2))
     st.write("Percentual de reviews positivas: ", round(df_filtered["sentiment"].mean() * 100, 2), "%")
     st.text("")
