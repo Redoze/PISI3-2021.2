@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import cross_val_score
 from wordcloud import WordCloud
 
 st.set_page_config(
@@ -147,10 +148,19 @@ def modelo_1(df, selected_game, selected_model, df_filtered):
     ax3.set_yticklabels(["Negativas", "Positivas"], fontsize=11)
     st.pyplot(fig3)
     
-    st.write(f'''<h2 style='text-align: center; font-size: 26px'>
-            Acurácia do modelo: {accuracy} </h2>
+    st.write(f'''<h2 style='text-align: center; font-size: 16px'>
+            Acurácia do modelo: {accuracy:.2f} </h2>
              ''', unsafe_allow_html=True)
     st.text("")
+    scores = cross_val_score(clf,X=X_train_vect,y=y_train,cv=5)
+
+    mean_accuracy = np.mean(scores)
+    std_deviation = scores.std()
+
+    st.write(f'''<h2 style='text-align: center; font-size:16px'>
+            Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}
+            Desvio padrão de: {std_deviation:.2f}</h2>
+             ''', unsafe_allow_html=True)
     st.text("")
     
     #Pega os coeficientes das features dentro do modelo
