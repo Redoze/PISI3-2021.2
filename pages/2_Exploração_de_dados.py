@@ -274,12 +274,18 @@ def grafico_4(df, selected_games, selected_reviews, filtered_data):
     st.write(f'''<h3 style='text-align: center'><br>
         Correlação entre a polaridade média das reviews e a quantidade média de jogadores<br><br></h3>
             ''', unsafe_allow_html=True)
+    
+    if selected_games[0] == None:
+        st.write('Selecione um Jogo, ou remova a opção "None" para o filtro utilizar toda base de dados')
+        st.stop()
 
-    df6 = carrega_df('df1')
+    carrega_df1 = carrega_df('df1')
     if not selected_games:
-        selected_games = df6['app_name'].unique()
+        selected_games = carrega_df1['app_name'].unique()
 
-    filtered_data_2 = df6[(df6["app_name"].isin(selected_games))]
+    filtered_data_2 = carrega_df1[(carrega_df1["app_name"].isin(selected_games))]
+    carrega_df1 = 0
+
     #calcular a media de polaridade de reviews por jogo
     positivas = filtered_data_2.groupby('app_id')['review_score'].sum()
     reviews_totais = filtered_data_2.groupby('app_id')['review_score'].count()
@@ -324,7 +330,13 @@ def grafico_4(df, selected_games, selected_reviews, filtered_data):
     #df com playercount e sentimentos
     merged_player_sentimentos_df = pd.merge(med_polaridade.reset_index(), player_df_threshold, on='app_id')
     
-    st.write(merged_player_sentimentos_df)
+    # Apresentando erro no tratamento das colunas
+    # merged_player_sentimentos_df.rename(columns = {'app_id': 'id', 'review_score': 'Avaliação do jogo', 'app_name': 'Nome do jogo',
+    #                                                'player_count': 'Contagem de jogadores'}, inplace=True)
+
+    # Exibe a tabela com o dataframe
+    st.dataframe(merged_player_sentimentos_df, hide_index=True,)
+
     fig = px.scatter(merged_player_sentimentos_df, x="review_score", y="player_count",
                         title='Correlação entre a polaridade média das reviews e a quantidade média de jogadores',
                         labels={'review_score':'Média das reviews (%)', 'player_count':'Quantidade média de jogadores'},
