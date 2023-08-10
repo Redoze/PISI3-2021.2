@@ -2,14 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import random as rn
 import plotly.express as px
-import plotly.graph_objs as go
 import seaborn as sns
 from funcs import *
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import cross_val_score
 from wordcloud import WordCloud
@@ -31,20 +28,17 @@ def build_header():
         ''', unsafe_allow_html=True)
     st.markdown("---")
 
-
 def build_body():
 
     st.write(f'''<h2 style='text-align: center; font-size: 36px'>
-            Resultados da Análise de sentimentos</h2>
+            Resultados da Análise de sentimentos<br><br></h2>
              ''', unsafe_allow_html=True) # 36px equivalem ao h2/subheader
-    st.text("")
     
     df = carrega_df('df1')
     df_tags = carrega_df('df2')
     game_options = df["app_name"].unique()
     model_options = {"Naive Bayes": 'modelo_1'}
 
-    
     df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["app_id_df2", "app_name_df2"])
     df_merged["sentiment"] = df_merged["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
@@ -57,7 +51,9 @@ def build_body():
             if nome_funcao == selected_model:
                 #st.write(globals())
                 chama_funcao = globals()[modelos]
-                chama_funcao(df, selected_game, selected_model, df_filtered)
+                # Removido os argumentos "df" e "selected_model" que não eram utilizados, caso os próximos modelo utilizem eles,
+                # é melhor ser implementada condicionais especificas da chama_funcao para cada modelo.
+                chama_funcao(selected_game, df_filtered)
 
     ############################################################ - ############################################################                
 
@@ -90,10 +86,10 @@ def build_body():
         
 ############################################################ Modelos ############################################################
     
-def modelo_1(df, selected_game, selected_model, df_filtered):
+def modelo_1(selected_game, df_filtered):
 
-    st.write(f'''<h3 style='text-align: center'><br>
-    Naive Bayes<br><br></h3>
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Classificação Naive Bayes para o jogo {selected_game[0]}<br><br></h3>
         ''', unsafe_allow_html=True)
     
     #Seta os inputs e outputs para os modelos de teste e de treino
@@ -115,28 +111,38 @@ def modelo_1(df, selected_game, selected_model, df_filtered):
     #Dando dados do naive bayes para uma coluna no dataframe
     df_filtered['predicted_sentiment'] = clf.predict(vectorizer.transform(df_filtered['review_text']))
 
-    
     #Mostra algumas informações sobre o jogo
-    st.write(f'''<h2 style='text-align: center; font-size: 36px'>
-            {selected_game[0]} </h2>
+    st.write(f'''<p style='text-align: center'>
+             Número total de avaliações: {len(df_filtered)}<br></p>
              ''', unsafe_allow_html=True)
-    st.text("")
     
-    st.write("Número total de reviews: ", len(df_filtered))
-    st.write("Pontuação média das reviews: ", round(df_filtered["review_score"].mean(), 2))
-    st.write("Percentual de reviews positivas: ", round(df_filtered["sentiment"].mean() * 100, 2), "%")
-    st.text("")
+    col1, col2 = st.columns(2)
     
-    st.subheader("Histograma das labels de sentimento:")
-    fig = px.histogram(df_filtered, x="predicted_sentiment", nbins=2, labels=dict(predicted_sentiment="Polaridade Prevista", count="Contagem de Reviews"))
+    with col1:
+        st.write(f'''<p style='text-align: center'>
+                Pontuação média das avaliações: {round(df_filtered["review_score"].mean(), 2)} </p>
+                ''', unsafe_allow_html=True)
+    with col2:
+        st.write(f'''<p style='text-align: center'>
+                Percentual de avaliações positivas: {round(df_filtered["sentiment"].mean() * 100, 2)}%<br><br></p>
+                ''', unsafe_allow_html=True)
+
+    st.write(f'''<h3 style='text-align: center'>
+            Histograma das avalições por sentimento</h3>
+            ''', unsafe_allow_html=True)
+    
+    fig = px.histogram(df_filtered, x="predicted_sentiment", nbins=2, labels=dict(predicted_sentiment="Polaridade prevista ", count="Contagem de avaliações "))
     fig.update_xaxes(
-        ticktext=["Negativas", "Positivas"],
+        ticktext=[" Negativas", " Positivas"],
         tickvals=[0,1]
     )
     st.plotly_chart(fig)
     
     #Matriz de confusão do naive bayes
-    st.subheader("Matriz de confusão:")
+    st.write(f'''<h3 style='text-align: center'>
+        Matriz de confusão<br><br></h3>
+        ''', unsafe_allow_html=True)
+    
     y_pred = clf.predict(X_test_vect)
     cm = pd.crosstab(y_test, y_pred, rownames=["Real"], colnames=["Previsto"])
     fig3, ax3 = plt.subplots(figsize=(5, 5))
@@ -148,8 +154,8 @@ def modelo_1(df, selected_game, selected_model, df_filtered):
     ax3.set_yticklabels(["Negativas", "Positivas"], fontsize=11)
     st.pyplot(fig3)
     
-    st.write(f'''<h2 style='text-align: center; font-size: 16px'>
-            Acurácia do modelo: {accuracy:.2f} </h2>
+    st.write(f'''<p style='text-align: center'>
+            <br>Acurácia do modelo: {accuracy:.2f} </p>
              ''', unsafe_allow_html=True)
     st.text("")
     scores = cross_val_score(clf,X=X_train_vect,y=y_train,cv=5)
@@ -157,27 +163,26 @@ def modelo_1(df, selected_game, selected_model, df_filtered):
     mean_accuracy = np.mean(scores)
     std_deviation = scores.std()
 
-    st.write(f'''<h2 style='text-align: center; font-size:16px'>
+    st.write(f'''<p style='text-align: center'>
             Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}
-            Desvio padrão de: {std_deviation:.2f}</h2>
+            Desvio padrão de: {std_deviation:.2f}</p>
              ''', unsafe_allow_html=True)
     st.text("")
     
-    #Pega os coeficientes das features dentro do modelo
-    coefs = clf.feature_log_prob_
-    #Pega o nome das features pelo vetorizador
-    feature_names = vectorizer.get_feature_names_out()
-    #Pega os labels de classe
-    classes = clf.classes_
-    #Pega o indice da classe negativa
-    neg_index = np.where(classes == 0)[0][0]
-    #Pega o indice da classe positiva
-    pos_index = np.where(classes == 1)[0][0]
-    #Extrai os atributos negativos
-    negative_features = [feature_names[i] for i in np.argsort(coefs[neg_index])[:100]]
-    #Extrai os atributos positivos
-    positive_features = [feature_names[i] for i in np.argsort(coefs[pos_index])[::-1][:100]]
-    
+    # #Pega os coeficientes das features dentro do modelo
+    # coefs = clf.feature_log_prob_
+    # #Pega o nome das features pelo vetorizador
+    # feature_names = vectorizer.get_feature_names_out()
+    # #Pega os labels de classe
+    # classes = clf.classes_
+    # #Pega o indice da classe negativa
+    # neg_index = np.where(classes == 0)[0][0]
+    # #Pega o indice da classe positiva
+    # pos_index = np.where(classes == 1)[0][0]
+    # #Extrai os atributos negativos
+    # negative_features = [feature_names[i] for i in np.argsort(coefs[neg_index])[:100]]
+    # #Extrai os atributos positivos
+    # positive_features = [feature_names[i] for i in np.argsort(coefs[pos_index])[::-1][:100]]
     
     #Criar o wordcloud pra reviews positivas e negativas
     positive_text = " ".join(df_filtered[df_filtered["predicted_sentiment"] == 1]["review_text"])
@@ -186,19 +191,38 @@ def modelo_1(df, selected_game, selected_model, df_filtered):
     # Verificar se o texto não está vazio antes de criar a nuvem de palavras
     if len(positive_text) > 0:
         positive_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(positive_text)
-        st.subheader("Word cloud de reviews positivas:")
+        st.write(f'''<h3 style='text-align: center'>
+                 Nuvem de palavras de avaliações positivas:<br><br></h3>
+                 ''', unsafe_allow_html=True)
         st.image(positive_wordcloud.to_image())
+        st.write("")
     else:
-        st.subheader("Word cloud de reviews positivas:")
-        st.write("Nenhuma review positiva encontrada para este jogo.")
+        st.write(f'''<h3 style='text-align: center'>
+                Nuvem de palavras de avaliações positivas:<br><br></h3>
+                ''', unsafe_allow_html=True)
+        st.write(f'''<p style='text-align: center'>
+                Nenhuma review positiva encontrada para este jogo.<br></p>
+                ''', unsafe_allow_html=True)
+        st.write("")
     
     if len(negative_text) > 0:
         negative_wordcloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_text(negative_text)
-        st.subheader("Word cloud de reviews negativas:")
+        st.write(f'''<h3 style='text-align: center'>
+                 Nuvem de palavras de avaliações negativas:<br><br></h3>
+                 ''', unsafe_allow_html=True)
         st.image(negative_wordcloud.to_image())
+        st.write("")
     else:
-        st.subheader("Word cloud de reviews negativas:")
-        st.write("Nenhuma review negativa encontrada para este jogo.")
+        st.write(f'''<h3 style='text-align: center'>
+                Nuvem de palavras de avaliações negativas:<br><br></h3>
+                ''', unsafe_allow_html=True)
+        st.write(f'''<p style='text-align: center'>
+                Nenhuma review negativa encontrada para este jogo.<br></p>
+                ''', unsafe_allow_html=True)
+        st.write("")
+    
+    # Código parado temporariamente para evitar a exibição de erros
+    st.stop()
     
     try:
         #Carrega os dados de contagem de jogadores para o jogo selecionado
