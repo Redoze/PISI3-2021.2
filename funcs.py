@@ -1,41 +1,9 @@
 import streamlit as st
 import pandas as pd
-import random as rn
 import os
 import re
 import numpy as np
 from scipy import stats
-
-# Versão antiga de leitura dos dataframes. Ignorem e passem a usar a nova versão mais abaixo.
-@st.cache_resource
-def load_csv():
-    p = 0.01
-    url = "https://www.dropbox.com/s/fy4cffn16usarzk/Dataset_limpo.csv?raw=1"
-    try:
-        df = pd.read_csv(url, skiprows=lambda i: i>0 and rn.random() > p)
-    except Exception as e:
-        error_msg = "Erro ao carregar arquivo CSV"
-        st.write(error_msg)
-        raise Exception(error_msg)
-    return df
-
-@st.cache_resource
-def load_csv2(): 
-    url = "https://www.dropbox.com/s/f7lmv645avnajkd/steam.csv?raw=1"
-    try:
-        df_tags = pd.read_csv(url)
-    except Exception as e:
-        error_msg = "Erro ao carregar arquivo CSV"
-        st.write(error_msg)
-        raise Exception(error_msg)
-    return df_tags
-
-@st.cache_data
-def load_csv3(gameid):
-    df_time = pd.read_csv("pages/PlayerCountHistory/{}.csv".format(gameid))
-    return df_time
-
-#::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::  -  ::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 # Os dataframes foram divididos pelas suas colunas, agora cada coluna passou a ser um arquivo independente que também foi
 # convertido para o formato parquet.
@@ -44,12 +12,11 @@ def load_csv3(gameid):
 
 # Dicionário com os dataframes e suas colunas.
 dataframes = {'df1':['app_id', 'app_name', 'review_score', 'review_votes', 'review_text'],
-              'df2':['app_id_df2', 'app_name_df2', 'release_date', 'english', 'developer', 'publisher', 'platforms', 'required_age',
-             'categories', 'genres', 'steamspy_tags', 'achievements', 'positive_ratings', 'negative_ratings',
-             'average_playtime', 'median_playtime', 'owners', 'price']}
+              'df2':['app_id_df2', 'app_name_df2', 'release_date', 'english', 'developer', 'publisher', 'platforms', 
+                     'required_age', 'categories', 'genres', 'steamspy_tags', 'achievements', 'positive_ratings', 
+                     'negative_ratings', 'average_playtime', 'median_playtime', 'owners', 'price']}
 
 # Retorna o caminho do dataframe da coluna escolhida
-@st.cache_resource
 def procura_coluna(nome_coluna):
 
     path_df1 = 'data/df1/'
@@ -65,7 +32,6 @@ def procura_coluna(nome_coluna):
 
 # Carrega uma coluna especifica
 # # # Não passe review_text como argumento! # # #
-@st.cache_resource
 def carrega_coluna(coluna):
     path = procura_coluna(coluna)
     df_coluna = pd.read_parquet(f'{path}/{coluna}.parquet')
@@ -102,7 +68,6 @@ def carrega_review_text():
 # Fundi duas colunas. Os parâmetros são: nome da primeira coluna e o caminho de seu dataframe e o nome da segunda coluna
 # e seu caminho de seu dataframe.
 # Esta função também pode misturar colunas de diferentes dataframes, por isso cada coluna recebe seu devido caminho.
-@st.cache_resource
 def mistura_colunas(coluna1, coluna2):
 
     if coluna1 == 'review_text' or coluna2 == 'review_text':
@@ -126,7 +91,6 @@ def mistura_colunas(coluna1, coluna2):
         return merge
 
 # Retorna o dataframe completo
-@st.cache_resource
 def carrega_df(nome_df):
     
     if nome_df == 'df1':
@@ -161,11 +125,6 @@ def carrega_df(nome_df):
     else:
         df3 = pd.read_parquet(f'data/df3/{nome_df}.parquet')
         return df3
-    
-
-def carrega_df_jogo(appid):
-    
-    carrega_jogo_selecionado = df[df['app_id'] == appid]
 
 def remove_outliers_zscore(df, columns, threshold=3):
     z_scores = np.abs(stats.zscore(df[columns]))
