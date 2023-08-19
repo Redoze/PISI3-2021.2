@@ -10,6 +10,10 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.model_selection import cross_val_score
 from wordcloud import WordCloud
+from streamlit_extras.no_default_selectbox import selectbox
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score
+from collections import Counter
 
 st.set_page_config(
     page_title="Análise de sentimentos",
@@ -20,11 +24,11 @@ st.set_page_config(
 def build_header():
 
     st.write(f'''<h1 style='text-align: center'
-             >Exploração de dados apartir da análise de sentimentos<br><br></h1>
+             >Exploração de dados apartir da análise de sentimentos<br></h1>
              ''', unsafe_allow_html=True)
     
     st.write(f'''<h2 style='text-align: center; font-size: 18px'>
-    Análise de sentimentos das reviews sob as colunas do dataset.<br></h2>
+            <br>Análise de sentimentos das avaliações sob as colunas do conjuto de dados.<br></h2>
         ''', unsafe_allow_html=True)
     st.markdown("---")
 
@@ -35,17 +39,20 @@ def build_body():
              ''', unsafe_allow_html=True) # 36px equivalem ao h2/subheader
     
     df = carrega_df('df1')
-    df_tags = carrega_df('df2')
-    game_options = df["app_name"].unique()
-    model_options = {"Naive Bayes": 'modelo_1'}
+    # Removido carregamento e processamento do df2 que estava aqui. Era realmente necessário?
 
-    df_merged = pd.merge(df, df_tags, left_on=["app_id", "app_name"], right_on=["app_id_df2", "app_name_df2"])
-    df_merged["sentiment"] = df_merged["review_score"].apply(lambda x: 1 if x == 1 else 0)
+    game_options = df["app_name"].unique()
+    model_options = {"Naive Bayes": 'modelo_1', "K-Nearest Neighbor": 'modelo_2'}
+
+    df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
     def inicia_modelo(posicao):
         #Filtrar o dataset baseado no jogo selecionado
-        df_filtered = df_merged[(df_merged["app_name"].isin(selected_game))]
-        
+        df_filtered = df[(df["app_name"].isin(selected_game))]
+        del df_filtered['app_id']
+        del df_filtered['app_name']
+        del df_filtered['review_votes']
+
         for nome_funcao, modelos in model_options.items():
             
             if nome_funcao == selected_model:
@@ -66,24 +73,13 @@ def build_body():
         selected_game = [st.selectbox("Selecione um jogo", game_options)]
 
     with coluna_2:
-        selected_model = st.selectbox("Selecione o modelo de classificação", list(model_options.keys()))
+        selected_model = selectbox("Selecione o modelo de classificação", list(model_options.keys()))
 
     with vazio_2:
         st.empty()
-
-    ############################################################ Exibição dos modelos ############################################################
-
-    vazio_1_lv_3, coluna_1_lv_3, vazio_2_lv_3 = st.columns([1,18,1])
     
-    with vazio_1_lv_3:
-        st.empty()
+    inicia_modelo(0)
 
-    with coluna_1_lv_3:
-        inicia_modelo(0)
-            
-    with vazio_2_lv_3:
-        st.empty()         
-        
 ############################################################ Modelos ############################################################
     
 def modelo_1(selected_game, df_filtered):
@@ -91,6 +87,13 @@ def modelo_1(selected_game, df_filtered):
     st.write(f'''<h3 style='text-align: center'>
              <br>Classificação Naive Bayes para o jogo {selected_game[0]}<br><br></h3>
         ''', unsafe_allow_html=True)
+    
+    st.write(f'''<p style='text-align: center'>
+             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br>PLACEHOLDER SOBRE O CLASSIFICADOR <br>PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br><br></p>
+             ''', unsafe_allow_html=True)
+    
+    # Função que mostra em tela as estatiscas das avaliações do jogo
+    informacoes_sobre_jogo(df_filtered)
     
     #Seta os inputs e outputs para os modelos de teste e de treino
     X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"], test_size=0.2, random_state=42)
@@ -110,22 +113,6 @@ def modelo_1(selected_game, df_filtered):
     
     #Dando dados do naive bayes para uma coluna no dataframe
     df_filtered['predicted_sentiment'] = clf.predict(vectorizer.transform(df_filtered['review_text']))
-
-    #Mostra algumas informações sobre o jogo
-    st.write(f'''<p style='text-align: center'>
-             Número total de avaliações: {len(df_filtered)}<br></p>
-             ''', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.write(f'''<p style='text-align: center'>
-                Pontuação média das avaliações: {round(df_filtered["review_score"].mean(), 2)} </p>
-                ''', unsafe_allow_html=True)
-    with col2:
-        st.write(f'''<p style='text-align: center'>
-                Percentual de avaliações positivas: {round(df_filtered["sentiment"].mean() * 100, 2)}%<br><br></p>
-                ''', unsafe_allow_html=True)
 
     st.write(f'''<h3 style='text-align: center'>
             Histograma das avalições por sentimento</h3>
@@ -249,6 +236,62 @@ def modelo_1(selected_game, df_filtered):
        
        st.subheader("Sentimento geral previsto:")
        st.write('A pontuação geral de sentimento prevista para ',f'{selected_game[0]}','é de:', round(overall_sentiment*100,2),'% vs a verdadeira pontuação das reviews de:',  round(df_filtered["sentiment"].mean() * 100, 2), "%")
+
+def modelo_2(selected_game, df_filtered):
+
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Classificação K-Nearest Neighbor para o jogo {selected_game[0]}<br><br></h3>
+            ''', unsafe_allow_html=True)
+    
+    st.write(f'''<p style='text-align: center'>
+             O classificador k-Nearest Neighbors (k-NN) classifica um ponto de dados com base na maioria das classes dos seus k vizinhos mais próximos em um espaço de recursos. 
+             Ele não faz suposições sobre a distribuição dos dados, mas pode ser sensível à escala. Nesta análise de sentimentos, seus recursos estão definidos para 100 e o valor de k vizinhos para 3.<br><br>
+             ''', unsafe_allow_html=True)
+    
+    # Função que mostra em tela as estatiscas das avaliações do jogo
+    informacoes_sobre_jogo(df_filtered)
+    
+    # Dividindo os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"], test_size=0.2, random_state=42)
+
+    # Convertendo as palavras em recursos numéricos (vetores TF-IDF)
+    vectorizer = TfidfVectorizer(max_features = 100) 
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+
+    def predict(x, X_train, y_train, k = 3):
+        distances = [np.linalg.norm(x - x_train) for x_train in X_train]
+        k_indices = np.argsort(distances)[:k]
+        k_nearest_labels = [y_train.iloc[i] for i in k_indices] # .iloc para acessar por índices
+        most_common = Counter(k_nearest_labels).most_common(1)
+        return most_common[0][0]
+
+    # Treinando o modelo e fazendo previsões
+    predictions = [predict(x, X_train_tfidf.toarray(), y_train, k=3) for x in X_test_tfidf.toarray()]
+
+    # Avaliando o desempenho do modelo
+    accuracy = accuracy_score(y_test, predictions)
+
+    st.write(f'''<p style='text-align: center'>
+             <br>Acurácia do modelo: {accuracy:.2f} </p>
+             ''', unsafe_allow_html=True)
+    st.text("")
+
+def informacoes_sobre_jogo(df):
+    st.write(f'''<p style='text-align: center'>
+            Número total de avaliações: {len(df)}<br></p>
+            ''', unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write(f'''<p style='text-align: center'>
+                Pontuação média das avaliações: {round(df["review_score"].mean(), 2)} </p>
+                ''', unsafe_allow_html=True)
+    with col2:
+        st.write(f'''<p style='text-align: center'>
+                Percentual de avaliações positivas: {round(df["sentiment"].mean() * 100, 2)}%<br><br></p>
+                ''', unsafe_allow_html=True)
 
 def main():
     build_header()
