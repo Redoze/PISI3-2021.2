@@ -15,6 +15,11 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
 from collections import Counter
 from sklearn.metrics import confusion_matrix
+from sklearn.svm import SVC
+from sklearn.metrics import recall_score
+from sklearn.metrics import precision_score, f1_score
+
+
 
 st.set_page_config(
     page_title="Análise de sentimentos",
@@ -41,7 +46,7 @@ def build_body():
     
     df = carrega_df('df1')
     game_options = df["app_name"].dropna().unique() # Adicionado o método 'dropna()' para remover os valores nulos.
-    model_options = {"Naive Bayes": 'modelo_1', "K-Nearest Neighbor": 'modelo_2'}
+    model_options = {"Naive Bayes": 'modelo_1', "K-Nearest Neighbor": 'modelo_2', "Support Vector Machine": 'modelo_3'}
 
     df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
@@ -273,6 +278,81 @@ def modelo_2(selected_game, df_filtered):
     st.text("")
 
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
+
+
+def modelo_3(selected_game, df_filtered):
+    # Descrição do modelo SVM
+    st.write(f'''<p style='text-align: center'>
+             O Support Vector Machine (SVM) é um classificador que procura encontrar um hiperplano de separação entre diferentes classes, maximizando a margem entre os pontos de dados e o hiperplano. Nesta análise, o kernel linear é usado.<br><br>
+             ''', unsafe_allow_html=True)
+
+    # Exibição de informações sobre o jogo
+    informacoes_sobre_jogo(df_filtered)
+
+    # Divisão dos dados em treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"],
+                                                        test_size=0.2, random_state=42)
+
+    # Vetorização dos textos usando TF-IDF
+    vectorizer = TfidfVectorizer(max_features=100)
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+
+    # Criação e treinamento do modelo SVM
+    clf = SVC(kernel='linear', random_state=42)
+    clf.fit(X_train_tfidf, y_train)
+
+    # Fazendo previsões usando o modelo treinado
+    predictions = clf.predict(X_test_tfidf)
+
+    # Criando um DataFrame para armazenar as previsões
+    df_predicted = df_filtered.loc[y_test.index].copy()
+    df_predicted['predicted_sentiment'] = predictions
+
+    # Cálculo de métricas de avaliação
+    accuracy = accuracy_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
+    precision = precision_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+
+    # Exibindo gráfico de avaliações por sentimento
+    grafico_avaliacoes_sentimento(df_predicted)
+
+    # Exibindo matriz de confusão
+    # Exibindo matriz de confusão
+    st.write(f'''<h3 style='text-align: center'>
+            <br>Matriz de Confusão<br><br></h3>
+            ''', unsafe_allow_html=True)
+
+    cm = confusion_matrix(y_test, predictions)
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    sns.set(style="ticks", context="talk")
+    plt.style.use("dark_background")
+    sns.color_palette("flare", as_cmap=True)
+    heatmap = sns.heatmap(cm, annot=True, fmt="d", annot_kws={"fontsize": 10})
+
+    ax.set_xticklabels(["Previsto: Negativas", "Previsto: Positivas"], fontsize=8)
+    ax.set_yticklabels(["Real: Negativas", "Real: Positivas"], fontsize=8)
+
+    plt.xlabel("Previsto")
+    plt.ylabel("Real")
+
+    st.pyplot(fig)
+
+    # Exibindo métricas de avaliação
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Métricas do modelo:<br><br></h3>
+             ''', unsafe_allow_html=True)
+    st.text(f"Acurácia: {accuracy:.2f}")
+    st.text(f"Recall: {recall:.2f}")
+    st.text(f"Precisão: {precision:.2f}")
+    st.text(f"F1-Score: {f1:.2f}")
+    st.text("")
+
+    # Exibindo nuvens de palavras
+    grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
+
 
 def informacoes_sobre_jogo(df):
     st.write(f'''<p style='text-align: center'>
