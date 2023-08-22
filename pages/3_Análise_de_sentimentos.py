@@ -289,8 +289,18 @@ def modelo_3(selected_game, df_filtered):
     # Exibição de informações sobre o jogo
     informacoes_sobre_jogo(df_filtered)
 
-    # Divisão dos dados em treinamento e teste
-    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"],
+    # Concatenar as colunas de review_text e review_score
+    df_filtered["combined_features"] = df_filtered["review_text"] + " " + df_filtered["review_score"].astype(str)
+
+    # Balancear os dados para incluir tanto reviews positivas quanto negativas
+    num_samples_per_class = 400
+    num_negative_samples = min(len(df_filtered[df_filtered["sentiment"] == 0]), num_samples_per_class)
+    positive_samples = df_filtered[df_filtered["sentiment"] == 1].sample(n=num_samples_per_class, random_state=42)
+    negative_samples = df_filtered[df_filtered["sentiment"] == 0].sample(n=num_negative_samples, random_state=42)
+    balanced_df = pd.concat([positive_samples, negative_samples])
+
+    # Dividir os dados em treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(balanced_df["combined_features"], balanced_df["sentiment"],
                                                         test_size=0.2, random_state=42)
 
     # Vetorização dos textos usando TF-IDF
@@ -306,7 +316,7 @@ def modelo_3(selected_game, df_filtered):
     predictions = clf.predict(X_test_tfidf)
 
     # Criando um DataFrame para armazenar as previsões
-    df_predicted = df_filtered.loc[y_test.index].copy()
+    df_predicted = balanced_df.loc[y_test.index].copy()
     df_predicted['predicted_sentiment'] = predictions
 
     # Cálculo de métricas de avaliação
@@ -318,7 +328,6 @@ def modelo_3(selected_game, df_filtered):
     # Exibindo gráfico de avaliações por sentimento
     grafico_avaliacoes_sentimento(df_predicted)
 
-    # Exibindo matriz de confusão
     # Exibindo matriz de confusão
     st.write(f'''<h3 style='text-align: center'>
             <br>Matriz de Confusão<br><br></h3>
@@ -332,11 +341,12 @@ def modelo_3(selected_game, df_filtered):
     sns.color_palette("flare", as_cmap=True)
     heatmap = sns.heatmap(cm, annot=True, fmt="d", annot_kws={"fontsize": 10})
 
-    ax.set_xticklabels(["Previsto: Negativas", "Previsto: Positivas"], fontsize=8)
-    ax.set_yticklabels(["Real: Negativas", "Real: Positivas"], fontsize=8)
+    ax.set_xticklabels(["Negativas (Previsto)", "Positivas (Previsto)"], fontsize=8)
+    ax.set_yticklabels(["Negativas (Real)", "Positivas (Real)"], fontsize=8)
 
-    plt.xlabel("Previsto")
-    plt.ylabel("Real")
+    # Ajuste o tamanho da fonte da barra de cores
+    cbar = heatmap.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=10)
 
     st.pyplot(fig)
 
@@ -352,6 +362,13 @@ def modelo_3(selected_game, df_filtered):
 
     # Exibindo nuvens de palavras
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
+
+
+
+
+
+
+
 
 
 def informacoes_sobre_jogo(df):
