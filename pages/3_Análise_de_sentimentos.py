@@ -21,14 +21,16 @@ from sklearn.metrics import precision_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils import compute_class_weight
 
+# Definindo a configuração da página
 st.set_page_config(
     page_title="Análise de sentimentos",
     page_icon="🔎",
     layout="centered",
 )
 
+# Função para construir o cabeçalho
 def build_header():
-
+    # Cabeçalho com título e descrição
     st.write(f'''<h1 style='text-align: center'
              >Exploração de dados apartir da análise de sentimentos<br></h1>
              ''', unsafe_allow_html=True)
@@ -38,8 +40,8 @@ def build_header():
             ''', unsafe_allow_html=True)
     st.markdown("---")
 
+# Função para construir o corpo principal
 def build_body():
-
     st.write(f'''<h2 style='text-align: center; font-size: 36px'>
             Resultados da Análise de sentimentos<br><br></h2>
              ''', unsafe_allow_html=True) # 36px equivalem ao h2/subheader
@@ -50,6 +52,7 @@ def build_body():
 
     df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
+    # Função para iniciar o modelo selecionado
     def inicia_modelo(posicao):
         #Filtrar o dataset baseado no jogo selecionado
         df_filtered = df[(df["app_name"].isin(selected_game))]
@@ -440,11 +443,7 @@ def modelo_4(selected_game, df_filtered):
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
 
-
-
-
-
-
+# Função para mostrar informações sobre o jogo
 def informacoes_sobre_jogo(df):
     st.write(f'''<p style='text-align: center'>
             Número total de avaliações: {len(df)}<br></p>
@@ -461,6 +460,7 @@ def informacoes_sobre_jogo(df):
                 Percentual de avaliações positivas: {round(df["sentiment"].mean() * 100, 2)}%<br><br></p>
                 ''', unsafe_allow_html=True)
 
+# Função para gerar o gráfico de avaliações por sentimento
 def grafico_avaliacoes_sentimento(df):
     st.write(f'''<h3 style='text-align: center'>
         Histograma das avalições por sentimento</h3>
@@ -471,7 +471,7 @@ def grafico_avaliacoes_sentimento(df):
     # Verifica o número de avaliações negativas e positivas
     num_negativas = len(df[df['predicted_sentiment'] == 0])
     num_positivas = len(df[df['predicted_sentiment'] == 1])
-    
+
     # Define as cores com base nas condições
     if num_negativas > 0 and num_positivas > 0 or num_negativas > 0:
         colors = ['#FF4136', '#2ECC40']
@@ -481,10 +481,6 @@ def grafico_avaliacoes_sentimento(df):
     fig.update_xaxes(ticktext=["Negativas", "Positivas"],
                      tickvals=[0,1])
     fig.update_yaxes(title_text = "Contagem de Avaliações")
-
-    
-    
-
     # Ajuste o espaçamento entre as colunas (bargap) e os limites do eixo x (range_x)
     fig.update_layout(bargap=0.2, xaxis_range=[-0.5, 1.5])
 
