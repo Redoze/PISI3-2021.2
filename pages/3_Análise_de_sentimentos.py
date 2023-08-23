@@ -18,8 +18,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.svm import SVC
 from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score, f1_score
-
-
+from sklearn.linear_model import LogisticRegression
+from sklearn.utils import compute_class_weight
 
 st.set_page_config(
     page_title="Análise de sentimentos",
@@ -46,7 +46,7 @@ def build_body():
     
     df = carrega_df('df1')
     game_options = df["app_name"].dropna().unique() # Adicionado o método 'dropna()' para remover os valores nulos.
-    model_options = {"Naive Bayes": 'modelo_1', "K-Nearest Neighbor": 'modelo_2', "Support Vector Machine": 'modelo_3'}
+    model_options = {"Naive Bayes": 'modelo_1', "K-Nearest Neighbor": 'modelo_2', "Support Vector Machine": 'modelo_3', "Regressão Logística": 'modelo_4'}
 
     df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
@@ -363,7 +363,81 @@ def modelo_3(selected_game, df_filtered):
     # Exibindo nuvens de palavras
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
+def modelo_4(selected_game, df_filtered):
+    # Descrição do modelo de Regressão Logística
+    st.write(f'''<p style='text-align: center'>
+             A regressão logística é um algoritmo de classificação que utiliza a função logística para modelar a probabilidade de um evento ocorrer. Neste exemplo, estamos usando a regressão logística para análise de sentimentos.<br><br>
+             ''', unsafe_allow_html=True)
 
+    # Exibindo informações sobre o jogo
+    informacoes_sobre_jogo(df_filtered)
+
+    # Dividindo os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"],
+                                                        test_size=0.2, random_state=42)
+
+    # Vetorização dos textos usando TF-IDF
+    vectorizer = TfidfVectorizer(max_features=1000)
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+
+    # Calculando os pesos das classes
+    class_weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
+
+    # Criação e treinamento do modelo de Regressão Logística com pesos ajustados
+    clf = LogisticRegression(random_state=42, class_weight={0: class_weights[0], 1: class_weights[1]})
+    clf.fit(X_train_tfidf, y_train)
+
+    # Fazendo previsões usando o modelo treinado
+    predictions = clf.predict(X_test_tfidf)
+
+    # Criando um DataFrame para armazenar as previsões
+    df_predicted = df_filtered.loc[y_test.index].copy()
+    df_predicted['predicted_sentiment'] = predictions
+
+    # Cálculo de métricas de avaliação
+    accuracy = accuracy_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
+    precision = precision_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+
+    # Exibindo gráfico de avaliações por sentimento
+    grafico_avaliacoes_sentimento(df_predicted)
+
+    # Exibindo matriz de confusão
+    st.write(f'''<h3 style='text-align: center'>
+            <br>Matriz de Confusão<br><br></h3>
+            ''', unsafe_allow_html=True)
+
+    cm = confusion_matrix(y_test, predictions)
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    sns.set(style="ticks", context="talk")
+    plt.style.use("dark_background")
+    sns.color_palette("flare", as_cmap=True)
+    heatmap = sns.heatmap(cm, annot=True, fmt="d", annot_kws={"fontsize": 10})
+
+    ax.set_xticklabels(["Negativas (Previsto)", "Positivas (Previsto)"], fontsize=8)
+    ax.set_yticklabels(["Negativas (Real)", "Positivas (Real)"], fontsize=8)
+
+    # Ajuste o tamanho da fonte da barra de cores
+    cbar = heatmap.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=10)
+
+    st.pyplot(fig)
+
+    # Exibindo métricas de avaliação
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Métricas do modelo:<br><br></h3>
+             ''', unsafe_allow_html=True)
+    st.text(f"Acurácia: {accuracy:.2f}")
+    st.text(f"Recall: {recall:.2f}")
+    st.text(f"Precisão: {precision:.2f}")
+    st.text(f"F1-Score: {f1:.2f}")
+    st.text("")
+
+    # Exibindo nuvens de palavras
+    grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
 
 
@@ -393,12 +467,23 @@ def grafico_avaliacoes_sentimento(df):
         ''', unsafe_allow_html=True)
     
     fig = px.histogram(df, x="predicted_sentiment", nbins=2, labels=dict(predicted_sentiment="Polaridade prevista ", count="Contagem de avaliações "))
-    fig.update_xaxes(ticktext=[" Negativas", " Positivas"],
+    
+    # Verifica o número de avaliações negativas e positivas
+    num_negativas = len(df[df['predicted_sentiment'] == 0])
+    num_positivas = len(df[df['predicted_sentiment'] == 1])
+    
+    # Define as cores com base nas condições
+    if num_negativas > 0 and num_positivas > 0 or num_negativas > 0:
+        colors = ['#FF4136', '#2ECC40']
+    else:
+        colors = ['#2ECC40']
+    fig.update_traces(marker_color=colors)
+    fig.update_xaxes(ticktext=["Negativas", "Positivas"],
                      tickvals=[0,1])
     fig.update_yaxes(title_text = "Contagem de Avaliações")
 
-    colors = ['#FF4136', '#2ECC40']
-    fig.update_traces(marker_color=colors)
+    
+    
 
     # Ajuste o espaçamento entre as colunas (bargap) e os limites do eixo x (range_x)
     fig.update_layout(bargap=0.2, xaxis_range=[-0.5, 1.5])
