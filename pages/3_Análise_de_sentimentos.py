@@ -21,6 +21,8 @@ from sklearn.metrics import precision_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils import compute_class_weight
 
+
+
 # Definindo a configuração da página
 st.set_page_config(
     page_title="Análise de sentimentos",
@@ -282,7 +284,6 @@ def modelo_2(selected_game, df_filtered):
 
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
-
 def modelo_3(selected_game, df_filtered):
     # Descrição do modelo SVM
     st.write(f'''<p style='text-align: center'>
@@ -292,14 +293,20 @@ def modelo_3(selected_game, df_filtered):
     # Exibição de informações sobre o jogo
     informacoes_sobre_jogo(df_filtered)
 
+
     # Concatenar as colunas de review_text e review_score
     df_filtered["combined_features"] = df_filtered["review_text"] + " " + df_filtered["review_score"].astype(str)
 
     # Balancear os dados para incluir tanto reviews positivas quanto negativas
-    num_samples_per_class = 400
+    num_samples_per_class = 200
     num_negative_samples = min(len(df_filtered[df_filtered["sentiment"] == 0]), num_samples_per_class)
+
+    # Ajuste do número de amostras por classe com base no tamanho da classe minoritária
+    if num_negative_samples < num_samples_per_class:
+        num_samples_per_class = num_negative_samples
+
     positive_samples = df_filtered[df_filtered["sentiment"] == 1].sample(n=num_samples_per_class, random_state=42)
-    negative_samples = df_filtered[df_filtered["sentiment"] == 0].sample(n=num_negative_samples, random_state=42)
+    negative_samples = df_filtered[df_filtered["sentiment"] == 0].sample(n=num_samples_per_class, random_state=42)
     balanced_df = pd.concat([positive_samples, negative_samples])
 
     # Dividir os dados em treinamento e teste
@@ -320,6 +327,82 @@ def modelo_3(selected_game, df_filtered):
 
     # Criando um DataFrame para armazenar as previsões
     df_predicted = balanced_df.loc[y_test.index].copy()
+    df_predicted['predicted_sentiment'] = predictions
+
+    # Cálculo de métricas de avaliação
+    accuracy = accuracy_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
+    precision = precision_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+
+    # Exibindo gráfico de avaliações por sentimento
+    grafico_avaliacoes_sentimento(df_predicted)
+
+    # Exibindo matriz de confusão
+    st.write(f'''<h3 style='text-align: center'>
+            <br>Matriz de Confusão<br><br></h3>
+            ''', unsafe_allow_html=True)
+
+    cm = confusion_matrix(y_test, predictions)
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    sns.set(style="ticks", context="talk")
+    plt.style.use("dark_background")
+    sns.color_palette("flare", as_cmap=True)
+    heatmap = sns.heatmap(cm, annot=True, fmt="d", annot_kws={"fontsize": 10})
+
+    ax.set_xticklabels(["Negativas (Previsto)", "Positivas (Previsto)"], fontsize=8)
+    ax.set_yticklabels(["Negativas (Real)", "Positivas (Real)"], fontsize=8)
+
+    # Ajuste o tamanho da fonte da barra de cores
+    cbar = heatmap.collections[0].colorbar
+    cbar.ax.tick_params(labelsize=10)
+
+    st.pyplot(fig)
+
+    # Exibindo métricas de avaliação
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Métricas do modelo:<br><br></h3>
+             ''', unsafe_allow_html=True)
+    st.text(f"Acurácia: {accuracy:.2f}")
+    st.text(f"Recall: {recall:.2f}")
+    st.text(f"Precisão: {precision:.2f}")
+    st.text(f"F1-Score: {f1:.2f}")
+    st.text("")
+
+    # Exibindo nuvens de palavras
+    grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
+
+def modelo_4(selected_game, df_filtered):
+    # Descrição do modelo de Regressão Logística
+    st.write(f'''<p style='text-align: center'>
+             A regressão logística é um algoritmo de classificação que utiliza a função logística para modelar a probabilidade de um evento ocorrer. Neste exemplo, estamos usando a regressão logística para análise de sentimentos.<br><br>
+             ''', unsafe_allow_html=True)
+
+    # Exibindo informações sobre o jogo
+    informacoes_sobre_jogo(df_filtered)
+
+    # Dividindo os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"],
+                                                        test_size=0.2, random_state=42)
+
+    # Vetorização dos textos usando TF-IDF
+    vectorizer = TfidfVectorizer(max_features=1000)
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+
+    # Calculando os pesos das classes
+    class_weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
+
+    # Criação e treinamento do modelo de Regressão Logística com pesos ajustados
+    clf = LogisticRegression(random_state=42, class_weight={0: class_weights[0], 1: class_weights[1]})
+    clf.fit(X_train_tfidf, y_train)
+
+    # Fazendo previsões usando o modelo treinado
+    predictions = clf.predict(X_test_tfidf)
+
+    # Criando um DataFrame para armazenar as previsões
+    df_predicted = df_filtered.loc[y_test.index].copy()
     df_predicted['predicted_sentiment'] = predictions
 
     # Cálculo de métricas de avaliação
@@ -530,3 +613,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
