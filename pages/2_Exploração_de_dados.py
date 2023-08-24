@@ -9,15 +9,15 @@ import matplotlib.pyplot as plt
 st.set_page_config(
     page_title="Exploração de dados",
     page_icon="🔎",
-    layout="wide",
+    layout="centered",
 )
 
 def build_header():
     st.write(f'''<h1 style='text-align: center'>
              Exploração de dados<br><br></h1>''', unsafe_allow_html=True)
     
-    st.write(f'''<h2 style='text-align: center; font-size: 18px'>
-             Investigação e análise dos conjuntos de dados - Visualização dos dados, detecção de padrões, identificação de outliers, etc.<br></h2>''', unsafe_allow_html=True)
+    st.write(f'''<p style='text-align: center'>
+             Investigação e análise dos conjuntos de dados - Visualização dos dados, detecção de padrões, identificação de outliers, etc.<br></p>''', unsafe_allow_html=True)
     st.markdown("---")
 
 def build_body():
@@ -28,137 +28,198 @@ def build_body():
     df = carrega_df('df1')
 
     # Define os itens a serem selecionados na lista dropdown
-    game_options = df["app_name"].unique()
+    game_options = df["app_name"].dropna().unique() # Adicionado o método 'dropna()' para remover os valores nulos.
     review_options = {"Negativa": -1, "Positiva": 1}
-    graph_options = {"Nuvem de palavras": 'grafico_1',
-                     "Histograma de contagem de reviews recomendados por sentimento": 'grafico_2', 
-                     "Relação entre avaliações e tempo de jogo": 'grafico_3', 
-                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores": 'grafico_4', 
-                     "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis": 'grafico_5'}
-    
-    def inicia_grafico(posicao):
-        # Cria um dataframe de dados filtrados baseados nas opções selecionadas
-        filtered_data = df[(df["app_name"].isin(selected_games)) & (df["review_score"].isin([review_options[review] for review in selected_reviews]))]
+
+    graph_options = {"Nuvem de palavras": ['grafico_1', 'game/review', 'filtered_data'],
+                     "Histograma de sentimentos": ['grafico_2', False],
+                     "Histograma de contagem de reviews recomendados por sentimento": ['grafico_3', False], 
+                     "Relação entre avaliações e tempo de jogo": ['grafico_4', False], 
+                     "Correlação entre a polaridade média das reviews e a quantidade média de jogadores": ['grafico_5', 'game/review', 'df'], 
+                     "Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis": ['grafico_6', 'game/review', 'df']}
+    # A string da posição 1 da lista dos valores das chaves representa uma condicional para mostrar ou não as demais caixas de seleção.
+    # False         - sem instrução
+    # 'game/review' - precisa de um jogo e avaliação
+    # A string da posição 2 da lista dos valores das chaves representa o argumento extra que o gráfico precisa. Podendo passar o argumento extra 'df' ou 'filtered_data'.
+
+    def inicia_grafico():
         
+        if graph_options[selected_graph][1] == 'game/review':
+            # Cria um dataframe de dados filtrados baseados nas opções selecionadas
+            filtered_data = df[(df["app_name"].isin(selected_games)) & (df["review_score"].isin([review_options[review] for review in selected_reviews]))]
+
         for nome_funcao, graficos in graph_options.items():
-            if nome_funcao == selected_graph[posicao]:
-                chama_funcao = globals()[graficos]
-                # Antenção com o tipo de 
-                chama_funcao(df, selected_games, selected_reviews, filtered_data)
+            if nome_funcao == selected_graph:
+                chama_funcao = globals()[graficos[0]]
 
-    ############################################################ - ############################################################
+                if graph_options[selected_graph][1] == False:
+                    chama_funcao()
 
-    vazio_1, coluna_1, vazio_2 = st.columns(3)
+                elif graph_options[selected_graph][1] == 'game/review' and graph_options[selected_graph][2] == 'df':
+                    chama_funcao(selected_games, selected_reviews, df)
+
+                elif graph_options[selected_graph][1] == 'game/review' and graph_options[selected_graph][2] == 'filtered_data':
+                    chama_funcao(selected_games, selected_reviews, filtered_data)
+
+    ############################################################ SELEÇÃO DO GRÁFICO ############################################################
+
+    vazio_1, coluna_1, vazio_2 = st.columns([2,5,2])
 
     with vazio_1:
         st.empty()
 
     with coluna_1:
-        selected_graph = st.multiselect("Selecione um gráfico: ", graph_options, max_selections = 1)  # DESATIVADO TEMPORARIAMENTE A OPÇÃO DE UTILIZAR 2 GRÁFICOS AO MESMO TEMPO
+        selected_graph = st.selectbox("Selecione um gráfico: ", graph_options)
 
     with vazio_2:
         st.empty()
     
-    ############################################################ - ############################################################
+    ############################################################ CONDICIONAIS DE JOGO E AVALIÇÃO ############################################################
 
-    vazio_1_lv_2, coluna_1_lv_2, coluna_2_lv_2, vazio_2_lv_2 = st.columns([3,2,2,3])
+    if graph_options[selected_graph][1] == 'game':   # Se o gráfico precisa apenas do input de jogo.
 
-    with vazio_1_lv_2:
-        st.empty()
-            
-    with coluna_1_lv_2:
-        # Usa o multiselect para definir as opções
-        selected_games = st.multiselect("Selecione o(s) jogo(s)", game_options)
+        vazio_1, coluna_1, vazio_2 = st.columns([1,3,1])
+
+        with vazio_1:
+            st.empty()
+
+        with coluna_1:
+            selected_games = st.multiselect("Selecione o(s) jogo(s)", game_options)
         
-    with coluna_2_lv_2:
-        selected_reviews = st.multiselect("Selecione o tipo de review", list(review_options.keys()))
+        with vazio_2:
+            st.empty()
+
+        inicia_grafico()
+        
+    elif graph_options[selected_graph][1] == 'review':   # Se o gráfico precisa apenas do input de avalição.
+
+        selected_reviews = st.multiselect("Selecione o tipo de avaliação", list(review_options.keys()))
+        inicia_grafico()
+
+    elif graph_options[selected_graph][1] == 'game/review':   # Se o gráfico precisa do input de jogo e avalição.
+
+        vazio_1, coluna_1, coluna_2, vazio_2 = st.columns([1,3,3,1])
+
+        with vazio_1:
+            st.empty()
+                
+        with coluna_1:
+            selected_games = st.multiselect("Selecione o(s) jogo(s)", game_options)
+            
+        with coluna_2:
+            selected_reviews = st.multiselect("Selecione o tipo de avaliação", list(review_options.keys()))
+        
+        with vazio_2:
+            st.empty()
+
+        inicia_grafico()
+
+    else: # Se o gráfico não precisa de nenhum input.
+        inicia_grafico()
     
-    with vazio_2_lv_2:
-        st.empty()
+    ############################################################ SELEÇÃO STRING ############################################################
 
-    ################################################## Exibição dos gráficos ##################################################
+def compara_selecao(plural, selected_games, selected_reviews):
+    # plural: recebe False ou True e diz se o gráfico lida com mais de uma entrada de jogo/avaliação
+    # Se o retorno da variável caso for igual a 0, nenhuma mensangem é exibida/retornada e o gráfico funciona normalmente.
 
-    if len(selected_graph) == 1:
-        vazio_1_lv_3, coluna_1_lv_3, vazio_2_lv_3 = st.columns(3)
+    caso = 0
+    texto = ""
 
-        with vazio_1_lv_3:
-            st.empty()
+    texto_1 = "Por favor, selecione ao menos um jogo e um tipo de avaliação."
+    texto_2 = "Por favor, selecione ao menos um tipo de avaliação."
+    texto_3 = "Por favor, selecione ao menos um jogo."
 
-        with coluna_1_lv_3:
-            inicia_grafico(0)
-            
-        with vazio_2_lv_3:
-            st.empty() 
-           
-    if len(selected_graph) == 2:
-        vazio_1_lv_3, coluna_1_lv_3, coluna_2_lv_3, vazio_2_lv_3 = st.columns([1,5,5,1], gap = "large")
+    texto_1p = "Por favor, selecione alguns jogos e ao menos um tipo de avaliação."
+    texto_3p = "Por favor, selecione alguns jogos."
 
-        with vazio_1_lv_3:
-            st.empty()
+    if len(selected_games) == 0 and len(selected_reviews) == 0:
+        caso = 1
 
-        with coluna_1_lv_3:
-            inicia_grafico(0)
-        
-        with coluna_2_lv_3:
-            inicia_grafico(1)
-            
-        with vazio_2_lv_3:
-            st.empty()
+        if plural == True:
+            texto = texto_1p
+        else:
+            texto = texto_1
+
+    elif len(selected_games) != 0 and len(selected_reviews) == 0:
+        caso = 2
+        texto = texto_2
+
+    elif len(selected_games) == 0 and len(selected_reviews) != 0:
+        caso = 3
+
+        if plural == True:
+            texto = texto_3p
+        else:
+            texto = texto_3
+
+    return caso, texto
 
 ######################################################### GRÁFICOS ########################################################
 
-def grafico_1(df, selected_games, selected_reviews, filtered_data):
+def grafico_1(selected_games, selected_reviews, filtered_data):
+    var_compara_selecao = compara_selecao(False, selected_games, selected_reviews)
 
-    st.write(f'''<h3 style='text-align: center'><br>
-        Nuvem de palavras<br><br></h3>
-            ''', unsafe_allow_html=True)
-    
-    if not selected_games:
-        selected_games = df['app_name'].unique()
+    if var_compara_selecao[0] == 0:
+        text = " ".join(review for review in filtered_data.review_text)
 
-    filtered_data_2 = df[(df["app_name"].isin(selected_games))]
-    text = " ".join(review for review in filtered_data.review_text)
-    try:
         wordcloud = WordCloud(max_words=100, background_color="black").generate(text)
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis("off")
-        st.pyplot(plt.gcf())
-    except ValueError:
-        st.caption('Favor selecionar ao menos um jogo e um tipo de review.')
-        pass
+        plt.legend().set_visible(False)
 
-    selected_graph = 'PASSAR GRÀFICOS PARA FUNÇÂO ASSIM COMO NA LINHA >>> 34 <<< E AJUSTAR OS OUTROS ERROS CONFORME DISCORD'
-    if selected_graph == "Histograma de sentimentos":
-        st.subheader("Histograma de sentimentos")
-        st.write('')
+        st.write(f'''<h3 style='text-align: center'><br>
+                Nuvem de palavras<br><br></h3>
+                ''', unsafe_allow_html=True)
+        
+        # Converte o gráfico do Matplotlib em imagem e use st.image()
+        image = wordcloud.to_image()
+        st.image(image, use_column_width=True)
+        
+        st.write(f'''<p style='text-align: center'>
+                <br>PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+                ''', unsafe_allow_html=True)
+        
+    else:
+        st.write(f'''<p style='text-align: center'>
+                <br>{var_compara_selecao[1]}</p>
+                ''', unsafe_allow_html=True)
 
-        # Carrega a coluna 'review_score' usando a função carrega_coluna()
-        coluna_review_score = carrega_coluna('review_score')
+def grafico_2():
 
-        histograma_sentimentos = go.Figure(data=[
-            go.Bar(
-                x=['Positiva', 'Negativa'],
-                y=coluna_review_score.value_counts().tolist(),
-                marker=dict(
-                    color=['#2ECC40', '#FF4136'],
-                    line=dict(color='#000000', width=1)
-                )
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Histograma de sentimentos<br><br></h3>
+            ''', unsafe_allow_html=True)
+
+    # Carrega a coluna 'review_score' usando a função carrega_coluna()
+    coluna_review_score = carrega_coluna('review_score')
+
+    histograma_sentimentos = go.Figure(data=[
+        go.Bar(
+            x=['Positiva', 'Negativa'],
+            y=coluna_review_score.value_counts().tolist(),
+            marker=dict(
+                color=['#2ECC40', '#FF4136'],
+                line=dict(color='#000000', width=1)
             )
-        ])
-
-        histograma_sentimentos.update_layout(
-            title='Histograma de sentimentos',
-            xaxis_title='Polaridade da review',
-            yaxis_title='Contagem de registros'
         )
+    ])
 
-        st.plotly_chart(histograma_sentimentos)
-        st.write("Representação gráfica da distribuição de sentimentos em reviews de jogos da Steam")
+    histograma_sentimentos.update_layout(
+        title='',
+        xaxis_title='Polaridade da avaliação',
+        yaxis_title='Contagem de registros'
+    )
 
-def grafico_2(df, selected_games, selected_reviews, filtered_data):
+    st.plotly_chart(histograma_sentimentos)
+    st.write(f'''<p style='text-align: center'>
+             Representação gráfica da distribuição de sentimentos nas avaliações dos jogos da Steam</p>
+             ''', unsafe_allow_html=True)
+
+def grafico_3():
 
     st.write(f'''<h3 style='text-align: center'><br>
-        Histograma de contagem de reviews recomendados por sentimento<br><br></h3>
+        Histograma de contagem de avaliações recomendadas por sentimento<br><br></h3>
             ''', unsafe_allow_html=True)
     
     # Carregar as colunas relevantes do arquivo Parquet
@@ -170,7 +231,7 @@ def grafico_2(df, selected_games, selected_reviews, filtered_data):
 
     # Renomear os valores das colunas para facilitar a legibilidade
     df1['review_score'] = df1['review_score'].map({-1: 'Negativo', 1: 'Positivo'})
-    df1['review_votes'] = df1['review_votes'].map({0: 'Review não recomendada', 1: 'Review recomendada'})
+    df1['review_votes'] = df1['review_votes'].map({0: 'Avaliação não recomendada', 1: 'Avaliação recomendada'})
 
     # Contar a quantidade de reviews recomendadas e não recomendadas para cada sentimento
     sentiment_votes = df1.groupby(['review_score', 'review_votes']).size().unstack('review_votes')
@@ -178,23 +239,25 @@ def grafico_2(df, selected_games, selected_reviews, filtered_data):
     colors = ['#FF4136', '#2ECC40']
 
     barras_agrupadas = go.Figure(data=[
-        go.Bar(name='Review não recomendada', x=sentiment_votes.index, y=sentiment_votes['Review não recomendada'], 
+        go.Bar(name='Avaliação não recomendada', x=sentiment_votes.index, y=sentiment_votes['Avaliação não recomendada'], 
                 marker=dict(color=colors[0])),
-        go.Bar(name='Review recomendada', x=sentiment_votes.index, y=sentiment_votes['Review recomendada'], 
+        go.Bar(name='Avaliação recomendada', x=sentiment_votes.index, y=sentiment_votes['Avaliação recomendada'], 
                 marker=dict(color=colors[1]))
     ])
 
     barras_agrupadas.update_layout(
-        title='Contagem de reviews recomendadas e não recomendadas por sentimento',
+        title='',
         xaxis_title='Sentimento',
         yaxis_title='Contagem de registros',
         barmode='stack'
     )
 
     st.plotly_chart(barras_agrupadas)
-    st.write("Representação gráfica da contagem de reviews recomendadas e não recomendadas por sentimento")
+    st.write(f'''<p style='text-align: center'>
+             Representação gráfica da contagem de avaliações recomendadas e não recomendadas por sentimento</p>
+             ''', unsafe_allow_html=True)
 
-def grafico_3(df, selected_games, selected_reviews, filtered_data):
+def grafico_4():
 
     st.write(f'''<h3 style='text-align: center'><br>
         Relação entre avaliações e tempo de jogo<br><br></h3>
@@ -260,31 +323,32 @@ def grafico_3(df, selected_games, selected_reviews, filtered_data):
         ))
 
     fig.update_layout(
-        title='Avaliações em relação ao tempo médio de jogo',
+        title='',
         xaxis_title='Tempo médio de jogo',
         yaxis_title='Avaliações',
-        width=850,
-        height=500
+        # width=850,
+        # height=500
     )
     
     st.plotly_chart(fig)
+    st.write(f'''<p style='text-align: center'>
+             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+             ''', unsafe_allow_html=True)
 
-def grafico_4(df, selected_games, selected_reviews, filtered_data):
+def grafico_5(selected_games, selected_reviews, df):
+
+    var_compara_selecao = compara_selecao(True, selected_games, selected_reviews)
+
+    if var_compara_selecao[0] != 0:
+        st.write(f'''<p style='text-align: center'>
+                <br>{var_compara_selecao[1]}</p>
+                ''', unsafe_allow_html=True)
+        st.stop()
 
     st.write(f'''<h3 style='text-align: center'><br>
-        Correlação entre a polaridade média das reviews e a quantidade média de jogadores<br><br></h3>
+            Correlação entre a polaridade média das reviews e a quantidade média de jogadores<br><br></h3>
             ''', unsafe_allow_html=True)
-
-    texto = 'Selecione alguns jogos para explorar os dados'
-    if  len(selected_games) >= 1 and selected_games[0] == None:
-        st.write(texto)
-        st.stop()
-
-    if not selected_games:
-        st.write(texto)
-        st.stop()
-        # selected_games = df['app_name'].unique()
-
+    
     filtered_data_2 = df[(df["app_name"].isin(selected_games))]
 
     #calcular a media de polaridade de reviews por jogo
@@ -336,31 +400,40 @@ def grafico_4(df, selected_games, selected_reviews, filtered_data):
     #                                             'player_count': 'Contagem de jogadores'}, inplace=True)
 
     # Exibe a tabela com o dataframe
-    st.dataframe(merged_player_sentimentos_df, hide_index=True,)
+    col1, col2, col3 = st.columns([1,5,1])
 
+    with col1:
+        pass
+    with col2:
+        st.dataframe(merged_player_sentimentos_df, hide_index=True,)
+    with col3:
+        pass
+    
     fig = px.scatter(merged_player_sentimentos_df, x="review_score", y="player_count",
-                        title='Correlação entre a polaridade média das reviews e a quantidade média de jogadores',
-                        labels={'review_score':'Média das reviews (%)', 'player_count':'Quantidade média de jogadores'},
+                        title='',
+                        labels={'review_score':'Média das avaliações (%)', 'player_count':'Quantidade média de jogadores'},
                         hover_data=['app_name'],
                         color='review_score',            
                         color_continuous_scale=[(0, "red"),(1, "green")])
     st.plotly_chart(fig)
+    st.write(f'''<p style='text-align: center'>
+             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+             ''', unsafe_allow_html=True)
 
-def grafico_5(df, selected_games, selected_reviews, filtered_data):
+def grafico_6(selected_games, selected_reviews, df):
+
+    var_compara_selecao = compara_selecao(True, selected_games, selected_reviews)
+
+    if var_compara_selecao[0] != 0:
+        st.write(f'''<p style='text-align: center'>
+                <br>{var_compara_selecao[1]}</p>
+                ''', unsafe_allow_html=True)
+        st.stop()
 
     st.write(f'''<h3 style='text-align: center'><br>
-        Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis<br><br></h3>
+            Correlação entre a quantidade média de jogadores e quantidade média de avaliações indicadas como úteis<br><br></h3>
             ''', unsafe_allow_html=True)
-
-    texto = 'Selecione alguns jogos para explorar os dados'
-    if  len(selected_games) >= 1 and selected_games[0] == None:
-        st.write(texto)
-        st.stop()
-
-    if not selected_games:
-        st.write(texto)
-        st.stop()
-
+    
     filtered_data_2 = df[(df["app_name"].isin(selected_games))]
     
     # Calcula a quantidade média de reviews indicadas como úteis por jogo
@@ -394,16 +467,27 @@ def grafico_5(df, selected_games, selected_reviews, filtered_data):
     
     mesclado_jogadores_indicacoes_df = pd.merge(media_uteis.reset_index(), jogadores_df, on='app_id')
 
-    st.write(mesclado_jogadores_indicacoes_df)
+    # Exibe a tabela com o dataframe
+    col1, col2, col3 = st.columns([1,5,1])
+
+    with col1:
+        pass
+    with col2:
+        st.dataframe(mesclado_jogadores_indicacoes_df, hide_index=True,)
+    with col3:
+        pass
 
     grafvotes = px.scatter(mesclado_jogadores_indicacoes_df, x="review_votes", y="player_count",
-                            title='Correlação entre a quantidade média de jogadores e quantidade média de reviews indicadas como úteis',
-                            labels={'review_votes':'Média de reviews indicadas como úteis (%)', 'player_count':'Quantidade média de jogadores'},
+                            title='',
+                            labels={'review_votes':'Média de avaliações indicadas como úteis (%)', 'player_count':'Quantidade média de jogadores'},
                             hover_data=['app_name'],
                             color='review_votes',            
                             color_continuous_scale=[(0, "red"),(1, "green")])
 
     st.plotly_chart(grafvotes)
+    st.write(f'''<p style='text-align: center'>
+             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+             ''', unsafe_allow_html=True)
 
 def main():
     build_header()
