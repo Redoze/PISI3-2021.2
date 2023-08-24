@@ -24,11 +24,20 @@ def build_body():
     df_reviews = carrega_df('df1')
     df_reviews["sentiment"] = df_reviews["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
+    #função para tratar as categorias unidas numa string com ";"
+    def get_unique_options(df, column):
+        options_set = set()
+        for row in df[column]:
+            split_values = row.split(';')
+            options_set.update(split_values)
+        return list(options_set)
+
+    
     #definindo as colunas
-    genre_options = df["genres"].unique()
-    platform_options = df["platforms"].unique()
+    genre_options = get_unique_options(df, "genres")
+    platform_options = get_unique_options(df, "platforms")
+    category_options = get_unique_options(df, "categories")
     price_options = df['price'].apply(lambda x: 'Free' if x == float(0) else 'Paid').unique()
-    category_options = df["categories"].unique()
 
     #selected_genre = st.multiselect("Selecione um gênero para o jogo:", genre_options)
     #selected_platform = st.multiselect("Selecione uma plataforma para o jogo:", platform_options)
