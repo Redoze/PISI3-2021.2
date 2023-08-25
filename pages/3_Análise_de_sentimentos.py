@@ -38,7 +38,7 @@ def build_header():
              ''', unsafe_allow_html=True)
     
     st.write(f'''<p style='text-align: center'>
-            <br>Nessa página nos fazemos os testes de vários algoritmos de classificação que usaremos mais tarde no simulador de jogos para idemtificar
+            <br>Nessa página nós fazemos os testes de vários algoritmos de classificação que usaremos mais tarde no simulador de jogos para idemtificar
             as keywords mais importantes nas avaliações.<br></p>
             ''', unsafe_allow_html=True)
     st.markdown("---")
