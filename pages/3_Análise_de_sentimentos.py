@@ -38,7 +38,7 @@ def build_header():
              ''', unsafe_allow_html=True)
     
     st.write(f'''<p style='text-align: center'>
-            <br>Nessa página nós fazemos os testes de vários algoritmos de classificação que usaremos mais tarde no simulador de jogos para idemtificar
+            <br>Nessa página nós fazemos os testes de vários algoritmos de classificação que usaremos mais tarde no simulador de jogos para identificar
             as keywords mais importantes nas avaliações.<br></p>
             ''', unsafe_allow_html=True)
     st.markdown("---")
@@ -280,6 +280,7 @@ def modelo_2(selected_game, df_filtered):
 
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
+
 def modelo_3(selected_game, df_filtered):
     # Descrição do modelo SVM
     st.write(f'''<p style='text-align: center'>
@@ -288,7 +289,6 @@ def modelo_3(selected_game, df_filtered):
 
     # Exibição de informações sobre o jogo
     informacoes_sobre_jogo(df_filtered)
-
 
     # Concatenar as colunas de review_text e review_score
     df_filtered["combined_features"] = df_filtered["review_text"] + " " + df_filtered["review_score"].astype(str)
@@ -331,13 +331,18 @@ def modelo_3(selected_game, df_filtered):
     precision = precision_score(y_test, predictions)
     f1 = f1_score(y_test, predictions)
 
+    # Acurácia média do modelo usando cross-validation
+    scores = cross_val_score(clf, X=X_train_tfidf, y=y_train, cv=5)
+    mean_accuracy = np.mean(scores)
+    std_deviation = scores.std()
+
     # Exibindo gráfico de avaliações por sentimento
     grafico_avaliacoes_sentimento(df_predicted)
 
     # Exibindo matriz de confusão
     st.write(f'''<h3 style='text-align: center'>
-            <br>Matriz de Confusão<br><br></h3>
-            ''', unsafe_allow_html=True)
+                <br>Matriz de Confusão<br><br></h3>
+                ''', unsafe_allow_html=True)
 
     cm = confusion_matrix(y_test, predictions)
 
@@ -358,17 +363,19 @@ def modelo_3(selected_game, df_filtered):
 
     # Exibindo métricas de avaliação
     st.write(f'''<h3 style='text-align: center'>
-             <br>Métricas do modelo:<br><br></h3>
-             ''', unsafe_allow_html=True)
+                <br>Métricas do modelo:<br><br></h3>
+                ''', unsafe_allow_html=True)
     st.text(f"Acurácia: {accuracy:.2f}")
     st.text(f"Recall: {recall:.2f}")
     st.text(f"Precisão: {precision:.2f}")
     st.text(f"F1-Score: {f1:.2f}")
+    st.text(f"Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}")
+    st.text(f"Desvio padrão de: {std_deviation:.2f}")
     st.text("")
 
     # Exibindo nuvens de palavras
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
-
+	
 def modelo_4(selected_game, df_filtered):
     # Descrição do modelo de Regressão Logística
     st.write(f'''<p style='text-align: center'>
@@ -609,4 +616,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
