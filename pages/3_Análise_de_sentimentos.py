@@ -108,8 +108,9 @@ def build_body():
 def modelo_1(selected_game, df_filtered):
     
     st.write(f'''<p style='text-align: center'>
-             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br>PLACEHOLDER SOBRE O CLASSIFICADOR <br>PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER<br><br></p>
-             ''', unsafe_allow_html=True)
+             O Classificador Naive Bayes é um modelo probabilístico de aprendizado de máquina comumente utilizado para tarefas como
+             classificação de texto, filtragem de spam e análise de sentimento. Ele aplica o Teorema de Bayes com suposições de independência
+             ingênuas entre as características.''', unsafe_allow_html=True)
     
     # Função que mostra em tela as estatiscas das avaliações do jogo
     informacoes_sobre_jogo(df_filtered)
@@ -130,6 +131,7 @@ def modelo_1(selected_game, df_filtered):
     #Fazendo a avaliacao do modelo
     accuracy = clf.score(X_test_vect, y_test)
     
+    
     #Dando dados do naive bayes para uma coluna no dataframe
     df_filtered['predicted_sentiment'] = clf.predict(vectorizer.transform(df_filtered['review_text']))
 
@@ -141,6 +143,11 @@ def modelo_1(selected_game, df_filtered):
         ''', unsafe_allow_html=True)
     
     y_pred = clf.predict(X_test_vect)
+    
+    precision = precision_score(y_test, y_pred)
+    recall = recall_score(y_test, y_pred)
+    f1 = f1_score(y_test, y_pred)
+    
     cm = pd.crosstab(y_test, y_pred, rownames=["Real"], colnames=["Previsto"])
     fig3, ax3 = plt.subplots(figsize=(5, 5))
     sns.set(style="ticks", context="talk")
@@ -155,37 +162,25 @@ def modelo_1(selected_game, df_filtered):
     cbar.ax.tick_params(labelsize=10)
 
     st.pyplot(fig3)
-    
-    st.write(f'''<h3 style='text-align: center'>
-            <br>Acurácia do modelo: {accuracy:.2f}<br><br></h3>
-             ''', unsafe_allow_html=True)
-    st.text("")
-    scores = cross_val_score(clf,X=X_train_vect,y=y_train,cv=5)
 
+
+    # Exibindo métricas de avaliação
+
+    scores = cross_val_score(clf,X=X_train_vect,y=y_train,cv=5)
     mean_accuracy = np.mean(scores)
     std_deviation = scores.std()
-
-    st.write(f'''<p style='text-align: center'>
-            Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}
-            Desvio padrão de: {std_deviation:.2f}</p>
+    
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Métricas do modelo:<br><br></h3>
              ''', unsafe_allow_html=True)
+    st.text(f"Acurácia: {accuracy:.2f}")
+    st.text(f"Recall: {recall:.2f}")
+    st.text(f"Precisão: {precision:.2f}")
+    st.text(f"F1-Score: {f1:.2f}")
+    st.text(f"Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}")
+    st.text(f"Desvio padrão de: {std_deviation:.2f}")
     st.text("")
-    
-    # #Pega os coeficientes das features dentro do modelo
-    # coefs = clf.feature_log_prob_
-    # #Pega o nome das features pelo vetorizador
-    # feature_names = vectorizer.get_feature_names_out()
-    # #Pega os labels de classe
-    # classes = clf.classes_
-    # #Pega o indice da classe negativa
-    # neg_index = np.where(classes == 0)[0][0]
-    # #Pega o indice da classe positiva
-    # pos_index = np.where(classes == 1)[0][0]
-    # #Extrai os atributos negativos
-    # negative_features = [feature_names[i] for i in np.argsort(coefs[neg_index])[:100]]
-    # #Extrai os atributos positivos
-    # positive_features = [feature_names[i] for i in np.argsort(coefs[pos_index])[::-1][:100]]
-    
+ 
     grafico_nuvem_de_palavras_negativa_positiva(df_filtered)
     
     # Código parado temporariamente para evitar a exibição de erros
