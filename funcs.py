@@ -130,17 +130,15 @@ def remove_outliers_zscore(df, columns, threshold=3):
     z_scores = np.abs(stats.zscore(df[columns]))
     return df[(z_scores < threshold).all(axis=1)]
 
-def estimate_sales(df):
+def estimate_sales(release_date, number_of_players):
     conditions = [
-        (df['release_date'] < '2014-01-01'),
-        (df['release_date'] >= '2014-01-01') & (df['release_date'] < '2016-01-01'),
-        (df['release_date'] >= '2016-01-01') & (df['release_date'] < '2018-01-01'),
-        (df['release_date'] >= '2018-01-01') & (df['release_date'] < '2020-01-01'),
-        (df['release_date'] >= '2020-01-01')
+        (release_date < '2014-01-01'),
+        (release_date >= '2014-01-01') & (release_date < '2016-01-01'),
+        (release_date >= '2016-01-01') & (release_date < '2018-01-01'),
+        (release_date >= '2018-01-01') & (release_date < '2020-01-01'),
+        (release_date >= '2020-01-01')
     ]
 
-    values = [df['number_of_reviews']*600, df['number_of_reviews']*500, df['number_of_reviews']*400, df['number_of_reviews']*350, df['number_of_reviews']*300]
+    values = [number_of_players*600, number_of_players*500, number_of_players*400, number_of_players*350, number_of_players*300]
 
-    df['estimated_sales'] = np.select(conditions, values)
-
-    return df
+    return np.select(conditions, values)
