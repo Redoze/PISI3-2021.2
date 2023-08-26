@@ -5,6 +5,7 @@ from wordcloud import WordCloud
 import plotly.graph_objects as go
 from funcs import *
 import matplotlib.pyplot as plt
+from glob import glob
 
 st.set_page_config(
     page_title="Simulação do seu jogo",
@@ -53,8 +54,15 @@ def build_body():
                            (df["price"].apply(lambda x: 'Free' if x == float(0) else 'Paid').isin(selected_price)) &
                            (df["categories"].isin(selected_category))]
         
-        chama_funcao = globals()["keyword_extraction_and_word_cloud"]
-        chama_funcao(filtered_data, df_reviews)
+        selected_games2 = filtered_data['app_id_df2'].unique()
+        func_names = ["keyword_extraction_and_word_cloud", "player_count_and_units_sold_graph"]
+
+        for funcoes in func_names:
+            chama_funcao = globals()[func_names[func_names.index(funcoes)]]
+            chama_funcao(filtered_data, df_reviews, selected_games2)
+
+
+
 
     #chamando o modelo de machine learning e a word cloud
     #keyword_extraction_and_word_cloud(filtered_data)
@@ -108,8 +116,7 @@ def build_body():
         st.empty()   
 
 
-def keyword_extraction_and_word_cloud(filtered_data, df_reviews):
-    
+def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambiarra):
     #extrai os app_ids dos jogos baseados nos critérios de seleção
     selected_games = filtered_data['app_id_df2'].unique()
 
@@ -135,8 +142,8 @@ def keyword_extraction_and_word_cloud(filtered_data, df_reviews):
         negative_freq_dict = dict(zip(negative_features, negative_freqs))
 
         #gerando as wordclouds
-        positive_cloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_frequencies(positive_freq_dict)
-        negative_cloud = WordCloud(width=800, height=400, background_color="black", max_words=25).generate_from_frequencies(negative_freq_dict)
+        positive_cloud = WordCloud(width=1000, height=600, background_color="black", max_words=25).generate_from_frequencies(positive_freq_dict)
+        negative_cloud = WordCloud(width=1000, height=600, background_color="black", max_words=25).generate_from_frequencies(negative_freq_dict)
 
         st.write("Word Cloud para reviews positivas:", unsafe_allow_html=True)
         plt.imshow(positive_cloud, interpolation='bilinear')
@@ -150,11 +157,46 @@ def keyword_extraction_and_word_cloud(filtered_data, df_reviews):
         plt.show()
         st.image(negative_cloud.to_image())
     except ValueError:
-        st.write("Selecione todos os atributos primeiro.")
+        st.write("Selecione todos os atributos primeiro / Dados insuficientes para esses parâmetros.")
     pass
 
-def player_count_and_units_sold_graph(df):
-    # Your graphing function here...
+def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games):
+    dfs = []
+    for game in selected_games:
+        try:
+            df_pc = carrega_df(game)
+            df_pc['Time'] = pd.to_datetime(df_pc['Time'])
+
+            #unindo o df de playercount com o df filtrado
+            df_pc = pd.merge(df_pc, df, how='inner', left_on=df_pc.index, right_on='app_id_df2')
+            df_pc.set_index('Time', inplace=True)
+
+            #computando as vendas estimadas
+            df_pc['estimated_sales'] = estimate_sales(df_pc['release_date'], df_pc['Playercount'])
+
+            #computando a media de jogadores diarios com as vendas estimadas
+            df_daily = df_pc.resample('D').agg({'Playercount': 'mean', 'estimated_sales': 'mean'})
+
+            dfs.append(df_daily)
+        except FileNotFoundError:
+            pass
+    if not dfs:
+        st.write("Sem dados para mostrar.")
+        st.stop()
+    playercount_df = pd.concat(dfs)
+    
+
+    plt.style.use('dark_background')
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+    ax1.plot(playercount_df.index, playercount_df['estimated_sales'], color='tab:blue')
+    ax1.set_ylabel('Vendas estimadas', color='tab:blue')
+
+    ax2 = ax1.twinx()
+    ax2.plot(playercount_df.index, playercount_df['Playercount'], color='tab:red')
+    ax2.set_ylabel('Quantidade de jogadores', color='tab:red')
+
+    plt.title('Average Sales and Player Count over Time')
+    st.pyplot(fig)
     pass
 
 def main():
