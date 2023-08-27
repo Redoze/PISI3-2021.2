@@ -490,7 +490,7 @@ def informacoes_classificador(acuracia, recall, precisao, f1, acuracia_crossvali
 # Função para gerar o gráfico de avaliações por sentimento
 def grafico_avaliacoes_sentimento(df):
     st.write(f'''<h3 style='text-align: center'>
-        Histograma das avalições por sentimento</h3>
+        Histograma das avaliações por sentimento</h3>
         ''', unsafe_allow_html=True)
     
     fig = px.histogram(df, x="predicted_sentiment", nbins=2, labels=dict(predicted_sentiment="Polaridade prevista ", count="Contagem de avaliações "))
