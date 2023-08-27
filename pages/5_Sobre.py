@@ -9,15 +9,19 @@ st.set_page_config(
 
 def build_header():
 
-    st.title('Sobre')
-    st.text("")
-    st.write('**Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III - 2022.2 do curso de Bacharelado em Sistemas de Informação (BSI).**')
-    st.write('**Grupo: GGJJM**')
-    st.text("")
+    st.write(f'''<h1 style='text-align: center'>Sobre<br></h1>
+             <p style='text-align: center'>Projeto desenvolvido para a disciplina Projeto Interdisciplinar para Sistemas de Informação III - 2022.2 
+             do curso de Bacharelado em Sistemas de Informação (BSI).<br><br>
+             Docentes: Gabriel Alves e Maria da Conceição Moraes<br>
+             Grupo: GGJJM</p>
+             ''', unsafe_allow_html=True)
+    st.markdown("---")
 
 def build_body():
 
-    st.write("Participantes:")
+    st.write(f'''<h3 style='text-align: center'>
+             Participantes<br><br></h3>
+             ''', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
 
     with col1:
@@ -25,20 +29,24 @@ def build_body():
                     "github", "https://github.com/gabrielduaarte")
         func_mention(" Gabriel Moreira de Lemos e Silva", 
                     "github", "https://github.com/GabrielTFV")
+        
+    with col2:
         func_mention(" José Fernando de Oliveira Filho", 
                     "github", "https://github.com/fernandooliveira7")
-
-    with col2:
         func_mention(" José Francisco de Medeiros", 
                     "github", "https://github.com/Redoze")
-        func_mention(" Marcos de Oliveira de Jesus", 
-                    "github", "https://github.com/Markie98")
 
     st.markdown("---")
-    st.subheader('Links')
+    st.write(f'''<h3 style='text-align: center'>
+             Links<br></h3>
+             ''', unsafe_allow_html=True)
     st.text("")
-    col1, col2 = st.columns(2)
+
+    vazio1, col1, col2, vazio2 = st.columns([1,6,3,1])
     
+    with vazio1:
+        pass
+
     with col1:
         func_mention(" Artigo",
                     "📄", "https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4")
@@ -47,12 +55,15 @@ def build_body():
                     "github", "https://github.com/Redoze/PISI3-2022.2")
         
     with col2:
-        func_mention(" Dataset - 1", 
+        func_mention(" Conjunto de dados - 1", 
             "📘", "https://www.kaggle.com/datasets/andrewmvd/steam-reviews")
-        func_mention(" Dataset - 2", 
+        func_mention(" Conjunto de dados - 2", 
             "📙", "https://www.kaggle.com/datasets/nikdavis/steam-store-games")
-        func_mention(" Dataset - 3", 
+        func_mention(" Conjunto de dados - 3", 
             "📗", "https://data.mendeley.com/datasets/ycy3sy3vj2/1")
+        
+    with vazio2:
+        pass
 
 def func_mention(label, icon, url):
     mention(
