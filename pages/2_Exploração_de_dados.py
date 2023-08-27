@@ -177,7 +177,7 @@ def grafico_1(selected_games, selected_reviews, filtered_data):
         st.image(image, use_column_width=True)
         
         st.write(f'''<p style='text-align: center'>
-                <br>PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+                <br>Nuvem de Palavras para os jogos selecionados, mostrando a partir dos dados brutos algumas keywords que se destacam entre as reviews.</p>
                 ''', unsafe_allow_html=True)
         
     else:
@@ -332,10 +332,13 @@ def grafico_4():
     
     st.plotly_chart(fig)
     st.write(f'''<p style='text-align: center'>
-             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+             Representação em scatter mostrando a relação entre tempo de jogo médio e quantidade de avaliações</p>
              ''', unsafe_allow_html=True)
 
 def grafico_5(selected_games, selected_reviews, df):
+
+    if not selected_games:  #carrega todos os jogos para comparação caso nenhum esteja selecionado
+        selected_games = df['app_name'].unique()
 
     var_compara_selecao = compara_selecao(True, selected_games, selected_reviews)
 
@@ -346,7 +349,7 @@ def grafico_5(selected_games, selected_reviews, df):
         st.stop()
 
     st.write(f'''<h3 style='text-align: center'><br>
-            Correlação entre a polaridade média das reviews e a quantidade média de jogadores<br><br></h3>
+            Relação entre a polaridade média das reviews e a quantidade média de jogadores<br><br></h3>
             ''', unsafe_allow_html=True)
     
     filtered_data_2 = df[(df["app_name"].isin(selected_games))]
@@ -417,10 +420,14 @@ def grafico_5(selected_games, selected_reviews, df):
                         color_continuous_scale=[(0, "red"),(1, "green")])
     st.plotly_chart(fig)
     st.write(f'''<p style='text-align: center'>
-             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+             Essa visualização mostra a relação entre a polaridade média das reviews e a contagem média de jogadores para o(s) jogo(s) selecionados.
+             Tem como objetivo notar tendências dentro do dataset previamente.</p>
              ''', unsafe_allow_html=True)
 
 def grafico_6(selected_games, selected_reviews, df):
+
+    if not selected_games:  #carrega todos os jogos para comparação caso nenhum esteja selecionado
+        selected_games = df['app_name'].unique()
 
     var_compara_selecao = compara_selecao(True, selected_games, selected_reviews)
 
@@ -486,7 +493,9 @@ def grafico_6(selected_games, selected_reviews, df):
 
     st.plotly_chart(grafvotes)
     st.write(f'''<p style='text-align: center'>
-             PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER</p>
+             Essa visualização mostra a relação entre a contagem média de jogadores e o número de avaliações consideradas como úteis pela comunidade para os jogos selecionados.
+             Tem como objetivo mostrar tendências dentro do dataset previamente.
+             </p>
              ''', unsafe_allow_html=True)
 
 def main():
