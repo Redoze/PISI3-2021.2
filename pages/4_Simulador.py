@@ -10,13 +10,17 @@ from glob import glob
 st.set_page_config(
     page_title="Simulação do seu jogo",
     page_icon="🔎",
-    layout="wide",
+    layout="centered",
 )
 
 def build_header():
     st.write(f'''<h1 style='text-align: center'
-             >Ferramenta de simulação de um jogo<br><br></h1>
+             >Ferramenta de Simulação de Desempenho de Jogo<br></h1>
              ''', unsafe_allow_html=True)
+
+    st.write(f'''<p style='text-align: center'>
+            Bem-vindo à nossa ferramenta interativa que permite simular o jogo de acordo com diversas características. Explore as opções abaixo para personalizar sua simulação.</p>
+            ''', unsafe_allow_html=True)
     st.markdown("---")
 
 def build_body():
@@ -33,7 +37,6 @@ def build_body():
             options_set.update(split_values)
         return list(options_set)
 
-    
     #definindo as colunas
     genre_options = get_unique_options(df, "genres")
     platform_options = get_unique_options(df, "platforms")
@@ -44,8 +47,6 @@ def build_body():
     #selected_platform = st.multiselect("Selecione uma plataforma para o jogo:", platform_options)
     #selected_price = st.multiselect("Selecione um se o jogo é gratuito ou não:", list(price_options.keys()))
     #selected_category = st.multiselect("Selecione a categoria do jogo:", category_options)
-
-    
 
     def inicia_simulacao(posicao):
         #filtrando os dados
@@ -61,60 +62,46 @@ def build_body():
             chama_funcao = globals()[func_names[func_names.index(funcoes)]]
             chama_funcao(filtered_data, df_reviews, selected_games2)
 
-
-
-
     #chamando o modelo de machine learning e a word cloud
     #keyword_extraction_and_word_cloud(filtered_data)
     #player_count_and_units_sold_graph(filtered_data)
 
     ############################################################ - ############################################################
 
-    vazio_1_lv_2, coluna_1_lv_2, coluna_2_lv_2, vazio_2_lv_2 = st.columns([3,2,2,3])
+    vazio_1, coluna_1, coluna_2, vazio_2 = st.columns([1,5,5,1])
+
+    with vazio_1:
+        st.empty()
+            
+    with coluna_1:
+        # Usa o multiselect para definir as opções
+        selected_genre = st.multiselect("Selecione o(s) gênero(s)", genre_options)
+        
+    with coluna_2:
+        selected_platform = st.multiselect("Selecione uma plataforma para o jogo:", platform_options)
+    
+    with vazio_2:
+        st.empty()
+
+    ############################################################ - ############################################################
+
+    vazio_1_lv_2, coluna_1_lv_2, coluna_2_lv_2, vazio_2_lv_2 = st.columns([1,5,5,1])
 
     with vazio_1_lv_2:
         st.empty()
             
     with coluna_1_lv_2:
         # Usa o multiselect para definir as opções
-        selected_genre = st.multiselect("Selecione o(s) gênero(s)", genre_options)
+        selected_price = st.multiselect("Selecione se o jogo é gratuito ou não:", list(price_options))
         
     with coluna_2_lv_2:
-        selected_platform = st.multiselect("Selecione uma plataforma para o jogo:", platform_options)
+        selected_category = st.multiselect("Selecione a(s) categoria(s) do jogo:", category_options)
     
     with vazio_2_lv_2:
         st.empty()
 
-    ############################################################ - ############################################################
-
-    vazio_1_2v_2, coluna_1_2v_2, coluna_2_2v_2, vazio_2_2v_2 = st.columns([3,2,2,3])
-
-    with vazio_1_2v_2:
-        st.empty()
-            
-    with coluna_1_2v_2:
-        # Usa o multiselect para definir as opções
-        selected_price = st.multiselect("Selecione um se o jogo é gratuito ou não:", list(price_options))
-        
-    with coluna_2_2v_2:
-        selected_category = st.multiselect("Selecione a(s) categoria(s) do jogo:", category_options)
     
-    with vazio_2_2v_2:
-        st.empty()
-
-    ############################################################ Exibição dos dados ############################################################
-
-    vazio_1_lv_3, coluna_1_lv_3, vazio_2_lv_3 = st.columns([1,5,1])
-    
-    with vazio_1_lv_3:
-        st.empty()
-
-    with coluna_1_lv_3:
-        inicia_simulacao(0)
-            
-    with vazio_2_lv_3:
-        st.empty()   
-
+    inicia_simulacao(0)
 
 def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambiarra):
     #extrai os app_ids dos jogos baseados nos critérios de seleção
@@ -145,19 +132,26 @@ def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambia
         positive_cloud = WordCloud(width=1000, height=600, background_color="black", max_words=25).generate_from_frequencies(positive_freq_dict)
         negative_cloud = WordCloud(width=1000, height=600, background_color="black", max_words=25).generate_from_frequencies(negative_freq_dict)
 
-        st.write("Word Cloud para reviews positivas:", unsafe_allow_html=True)
+        st.write(f'''<p style='text-align: center'>
+                 Nuvem de palavras de avaliações positivas</p>
+                ''', unsafe_allow_html=True)
         plt.imshow(positive_cloud, interpolation='bilinear')
         plt.axis("off")
         plt.show()
         st.image(positive_cloud.to_image())
         
-        st.write("Word Cloud para reviews negativas:", unsafe_allow_html=True)
+        st.write(f'''<p style='text-align: center'>
+                 Nuvem de palavras de avaliações negativas</p>
+                ''', unsafe_allow_html=True)
+        
         plt.imshow(negative_cloud, interpolation='bilinear')
         plt.axis("off")
         plt.show()
         st.image(negative_cloud.to_image())
     except ValueError:
-        st.write("Selecione todos os atributos primeiro / Dados insuficientes para esses parâmetros.")
+        st.write(f'''<p style='text-align: center'>
+                <br>Selecione todos os atributos primeiro / Dados insuficientes para esses parâmetros.</p>
+                ''', unsafe_allow_html=True)
     pass
 
 def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games):
@@ -181,11 +175,12 @@ def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games):
         except FileNotFoundError:
             pass
     if not dfs:
-        st.write("Sem dados para mostrar.")
+        st.write(f'''<p style='text-align: center'>
+                Sem dados para exibir.</p>
+                ''', unsafe_allow_html=True)
         st.stop()
     playercount_df = pd.concat(dfs)
     
-
     plt.style.use('dark_background')
     fig, ax1 = plt.subplots(figsize=(10, 6))
     ax1.plot(playercount_df.index, playercount_df['estimated_sales'], color='tab:blue')
@@ -195,7 +190,7 @@ def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games):
     ax2.plot(playercount_df.index, playercount_df['Playercount'], color='tab:red')
     ax2.set_ylabel('Quantidade de jogadores', color='tab:red')
 
-    plt.title('Average Sales and Player Count over Time')
+    plt.title('Média de vendas e contagem de jogadores ao longo do tempo')
     st.pyplot(fig)
     pass
 
