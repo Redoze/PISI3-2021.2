@@ -400,6 +400,11 @@ def regressao_logistica(selected_game, df_filtered):
     precision = precision_score(y_test, predictions)
     f1 = f1_score(y_test, predictions)
 
+    # Acurácia média do modelo usando cross-validation
+    scores = cross_val_score(clf, X=X_train_tfidf, y=y_train, cv=5)
+    mean_accuracy = np.mean(scores)
+    std_deviation = scores.std()
+    
     # Exibindo gráfico de avaliações por sentimento
     grafico_avaliacoes_sentimento(df_predicted)
 
@@ -425,10 +430,6 @@ def regressao_logistica(selected_game, df_filtered):
 
     st.pyplot(fig)
     
-    # VARIÁVEIS PLACEHOLDERS, APENAS PARA EVITAR ERRO DE EXIBIÇÃO ANTES DA IMPLEMTAÇÃO FINAL.
-    mean_accuracy = 999999
-    std_deviation = 999999
-
     informacoes_classificador(accuracy, recall, precision, f1, mean_accuracy, std_deviation)
 
     # Exibindo nuvens de palavras
