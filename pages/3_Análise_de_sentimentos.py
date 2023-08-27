@@ -20,8 +20,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import precision_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils import compute_class_weight
-
-
+from sklearn.neighbors import KNeighborsClassifier
 
 # Definindo a configuração da página
 st.set_page_config(
@@ -51,7 +50,7 @@ def build_body():
     
     df = carrega_df('df1')
     game_options = df["app_name"].dropna().unique() # Adicionado o método 'dropna()' para remover os valores nulos.
-    model_options = {"Naive Bayes": 'modelo_1', "K-Nearest Neighbor": 'modelo_2', "Support Vector Machine": 'modelo_3', "Regressão Logística": 'modelo_4'}
+    model_options = {"Naive Bayes": 'naive', "k-Nearest Neighbor": 'k_nearest', "Support Vector Machine": 'support_vector', "Regressão Logística": 'regressao_logistica'}
 
     df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
@@ -83,7 +82,7 @@ def build_body():
         selected_game = selectbox("Selecione um jogo", game_options)
         selected_game = [selected_game] 
         # Após a mudança do uso do selectbox do streamlit extras que possui (---), foi preciso transformar selected_game para 
-        # lista a fim de ser compativél com o método 'isin()' da função 'inicia_modelo'.
+        # lista a fim de ser compatível com o método 'isin()' da função 'inicia_modelo'.
 
     with coluna_2:
         selected_model = selectbox("Selecione o modelo de classificação", list(model_options.keys()))
@@ -106,7 +105,7 @@ def build_body():
     
 ############################################################ Modelos ############################################################
     
-def modelo_1(selected_game, df_filtered):
+def naive(selected_game, df_filtered):
     
     st.write(f'''<p style='text-align: center'>
              O Classificador Naive Bayes é um modelo probabilístico de aprendizado de máquina comumente utilizado para tarefas como
@@ -132,7 +131,6 @@ def modelo_1(selected_game, df_filtered):
     #Fazendo a avaliacao do modelo
     accuracy = clf.score(X_test_vect, y_test)
     
-    
     #Dando dados do naive bayes para uma coluna no dataframe
     df_filtered['predicted_sentiment'] = clf.predict(vectorizer.transform(df_filtered['review_text']))
 
@@ -149,14 +147,16 @@ def modelo_1(selected_game, df_filtered):
     recall = recall_score(y_test, y_pred)
     f1 = f1_score(y_test, y_pred)
     
-    cm = pd.crosstab(y_test, y_pred, rownames=["Real"], colnames=["Previsto"])
+    cm = pd.crosstab(y_test, y_pred, rownames=[""], colnames=[""])
+    
     fig3, ax3 = plt.subplots(figsize=(5, 5))
     sns.set(style="ticks", context="talk")
     plt.style.use("dark_background")
     sns.color_palette("flare", as_cmap=True)
     heatmap = sns.heatmap(cm, annot=True, fmt="d", annot_kws={"fontsize": 10})
-    ax3.set_xticklabels(["Negativas", "Positivas"], fontsize=8)
-    ax3.set_yticklabels(["Negativas", "Positivas"], fontsize=8)
+
+    ax3.set_xticklabels(["Negativas (Previsto)", "Positivas (Previsto)"], fontsize=8)
+    ax3.set_yticklabels(["Negativas (Real)", "Positivas (Real)"], fontsize=8)
 
     # Ajuste o tamanho da fonte da barra de cores
     cbar = heatmap.collections[0].colorbar
@@ -164,23 +164,13 @@ def modelo_1(selected_game, df_filtered):
 
     st.pyplot(fig3)
 
-
     # Exibindo métricas de avaliação
 
     scores = cross_val_score(clf,X=X_train_vect,y=y_train,cv=5)
     mean_accuracy = np.mean(scores)
     std_deviation = scores.std()
     
-    st.write(f'''<h3 style='text-align: center'>
-             <br>Métricas do modelo:<br><br></h3>
-             ''', unsafe_allow_html=True)
-    st.text(f"Acurácia: {accuracy:.2f}")
-    st.text(f"Recall: {recall:.2f}")
-    st.text(f"Precisão: {precision:.2f}")
-    st.text(f"F1-Score: {f1:.2f}")
-    st.text(f"Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}")
-    st.text(f"Desvio padrão de: {std_deviation:.2f}")
-    st.text("")
+    informacoes_classificador(accuracy, recall, precision, f1, mean_accuracy, std_deviation)
  
     grafico_nuvem_de_palavras_negativa_positiva(df_filtered)
     
@@ -213,7 +203,7 @@ def modelo_1(selected_game, df_filtered):
        st.subheader("Sentimento geral previsto:")
        st.write('A pontuação geral de sentimento prevista para ',f'{selected_game[0]}','é de:', round(overall_sentiment*100,2),'% vs a verdadeira pontuação das reviews de:',  round(df_filtered["sentiment"].mean() * 100, 2), "%")
 
-def modelo_2(selected_game, df_filtered):
+def k_nearest(selected_game, df_filtered):
 
     st.write(f'''<p style='text-align: center'>
              O classificador k-Nearest Neighbors (k-NN) classifica um ponto de dados com base na maioria das classes de seus k vizinhos mais próximos em um espaço de recursos. 
@@ -245,12 +235,9 @@ def modelo_2(selected_game, df_filtered):
     df_predicted = df_filtered.loc[y_test.index].copy()
     df_predicted['predicted_sentiment'] = predictions
 
-    # Avaliando o desempenho do modelo
-    accuracy = accuracy_score(y_test, predictions)
-    
     grafico_avaliacoes_sentimento(df_predicted)
 
-    # Geração da matriz de confusão
+    # Exibindo matriz de confusão
     st.write(f'''<h3 style='text-align: center'>
             <br>Matriz de Confusão<br><br></h3>
             ''', unsafe_allow_html=True)
@@ -264,8 +251,8 @@ def modelo_2(selected_game, df_filtered):
     sns.color_palette("flare", as_cmap=True)
     heatmap = sns.heatmap(cm, annot=True, fmt="d", annot_kws={"fontsize": 10})
 
-    ax.set_xticklabels(["Negativas", "Positivas"], fontsize=8)
-    ax.set_yticklabels(["Negativas", "Positivas"], fontsize=8)
+    ax.set_xticklabels(["Negativas (Previsto)", "Positivas (Previsto)"], fontsize=8)
+    ax.set_yticklabels(["Negativas (Real)", "Positivas (Real)"], fontsize=8)
 
     # Ajuste o tamanho da fonte da barra de cores
     cbar = heatmap.collections[0].colorbar
@@ -273,15 +260,24 @@ def modelo_2(selected_game, df_filtered):
 
     st.pyplot(fig)
 
-    st.write(f'''<h3 style='text-align: center'>
-             <br>Acurácia do modelo: {accuracy:.2f}<br><br></h3>
-             ''', unsafe_allow_html=True)
-    st.text("")
+    # Avalia o desempenho do modelo
+    accuracy = accuracy_score(y_test, predictions)
+
+    # Calcula as métricas
+    recall = recall_score(y_test, predictions, average='weighted')
+    precision = precision_score(y_test, predictions, average='weighted')
+    f1 = f1_score(y_test, predictions, average='weighted')
+
+    # Calcula a acurácia média usando cross-validation
+    cv_scores = cross_val_score(KNeighborsClassifier(n_neighbors=3), X_train_tfidf, y_train, cv=5)
+    mean_cv_accuracy = np.mean(cv_scores)
+    std_cv_accuracy = np.std(cv_scores)
+
+    informacoes_classificador(accuracy, recall, precision, f1, mean_cv_accuracy, std_cv_accuracy)
 
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
-
-def modelo_3(selected_game, df_filtered):
+def support_vector(selected_game, df_filtered):
     # Descrição do modelo SVM
     st.write(f'''<p style='text-align: center'>
              O Support Vector Machine (SVM) é um classificador que procura encontrar um hiperplano de separação entre diferentes classes, maximizando a margem entre os pontos de dados e o hiperplano. Nesta análise, o kernel linear é usado.<br><br>
@@ -361,22 +357,12 @@ def modelo_3(selected_game, df_filtered):
 
     st.pyplot(fig)
 
-    # Exibindo métricas de avaliação
-    st.write(f'''<h3 style='text-align: center'>
-                <br>Métricas do modelo:<br><br></h3>
-                ''', unsafe_allow_html=True)
-    st.text(f"Acurácia: {accuracy:.2f}")
-    st.text(f"Recall: {recall:.2f}")
-    st.text(f"Precisão: {precision:.2f}")
-    st.text(f"F1-Score: {f1:.2f}")
-    st.text(f"Acurácia média do modelo usando cross-validation: {mean_accuracy:.2f}")
-    st.text(f"Desvio padrão de: {std_deviation:.2f}")
-    st.text("")
+    informacoes_classificador(accuracy, recall, precision, f1, mean_accuracy, std_deviation)
 
     # Exibindo nuvens de palavras
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
-
-def modelo_4(selected_game, df_filtered):
+	
+def regressao_logistica(selected_game, df_filtered):
     # Descrição do modelo de Regressão Logística
     st.write(f'''<p style='text-align: center'>
              A regressão logística é um algoritmo de classificação que utiliza a função logística para modelar a probabilidade de um evento ocorrer. Neste exemplo, estamos usando a regressão logística para análise de sentimentos.<br><br>
@@ -438,23 +424,23 @@ def modelo_4(selected_game, df_filtered):
     cbar.ax.tick_params(labelsize=10)
 
     st.pyplot(fig)
+    
+    # VARIÁVEIS PLACEHOLDERS, APENAS PARA EVITAR ERRO DE EXIBIÇÃO ANTES DA IMPLEMTAÇÃO FINAL.
+    mean_accuracy = 999999
+    std_deviation = 999999
 
-    # Exibindo métricas de avaliação
-    st.write(f'''<h3 style='text-align: center'>
-             <br>Métricas do modelo:<br><br></h3>
-             ''', unsafe_allow_html=True)
-    st.text(f"Acurácia: {accuracy:.2f}")
-    st.text(f"Recall: {recall:.2f}")
-    st.text(f"Precisão: {precision:.2f}")
-    st.text(f"F1-Score: {f1:.2f}")
-    st.text("")
+    informacoes_classificador(accuracy, recall, precision, f1, mean_accuracy, std_deviation)
 
     # Exibindo nuvens de palavras
     grafico_nuvem_de_palavras_negativa_positiva(df_predicted)
 
-
 # Função para mostrar informações sobre o jogo
 def informacoes_sobre_jogo(df):
+
+    st.write(f'''<h3 style='text-align: center'>
+            <br>Dados sobre as avaliações<br><br></h3>
+            ''', unsafe_allow_html=True)
+
     st.write(f'''<p style='text-align: center'>
             Número total de avaliações: {len(df)}<br></p>
             ''', unsafe_allow_html=True)
@@ -469,6 +455,37 @@ def informacoes_sobre_jogo(df):
         st.write(f'''<p style='text-align: center'>
                 Percentual de avaliações positivas: {round(df["sentiment"].mean() * 100, 2)}%<br><br></p>
                 ''', unsafe_allow_html=True)
+        
+def informacoes_classificador(acuracia, recall, precisao, f1, acuracia_crossvalidation, desvio_padrao):
+
+    st.write(f'''<h3 style='text-align: center'>
+             <br>Métricas do modelo<br><br></h3>
+             ''', unsafe_allow_html=True)
+
+    col1, col2 = st.columns([2,2], gap="small")
+
+    with col1:
+        st.write(f'''<p>Acurácia: {acuracia:.2f}</p>
+                ''', unsafe_allow_html=True)
+        
+        st.write(f'''<p>Recall: {recall:.2f}</p>
+                ''', unsafe_allow_html=True)
+        
+        st.write(f'''<p>Precisão: {precisao:.2f}</p>
+                ''', unsafe_allow_html=True)
+        
+    with col2:
+        st.write(f'''<p>F1-Score: {f1:.2f}</p>
+                ''', unsafe_allow_html=True)
+        
+        st.write(f'''<p>Acurácia média utilizando cross-validation: {acuracia_crossvalidation:.2f}</p>
+                ''', unsafe_allow_html=True)
+        
+        st.write(f'''<p>Desvio padrão de: {desvio_padrao:.2f}</p>
+                ''', unsafe_allow_html=True)
+    
+    st.text("")
+    st.text("")
 
 # Função para gerar o gráfico de avaliações por sentimento
 def grafico_avaliacoes_sentimento(df):
@@ -488,9 +505,10 @@ def grafico_avaliacoes_sentimento(df):
     else:
         colors = ['#2ECC40']
     fig.update_traces(marker_color=colors)
-    fig.update_xaxes(ticktext=["Negativas", "Positivas"],
+    fig.update_xaxes(ticktext=[" Negativas", " Positivas"],
                      tickvals=[0,1])
     fig.update_yaxes(title_text = "Contagem de Avaliações")
+
     # Ajuste o espaçamento entre as colunas (bargap) e os limites do eixo x (range_x)
     fig.update_layout(bargap=0.2, xaxis_range=[-0.5, 1.5])
 
@@ -540,5 +558,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
