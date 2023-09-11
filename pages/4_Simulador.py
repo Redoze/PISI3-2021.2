@@ -100,9 +100,19 @@ def build_body():
     
     with vazio_2_lv_2:
         st.empty()
-
     
-    inicia_simulacao(0)
+    ############################################################ - ############################################################
+
+    vazio_1_1v_3, coluna_1_2v, vazio_2_1v_3 = st.columns([1,30,1])
+
+    with vazio_1_1v_3:
+        st.empty()
+            
+    with coluna_1_2v:
+        inicia_simulacao(0)
+         
+    with vazio_2_1v_3:
+        st.empty()   
 
 def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambiarra):
     #extrai os app_ids dos jogos baseados nos critérios de seleção
