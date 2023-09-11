@@ -12,9 +12,9 @@ Documento: [PISI3 - Artigo](https://docs.google.com/document/d/151L1pRvdYTNYcvON
 
 Equipe:
 
-- [Gabriel Moreira de Lemos e Silva] (gabriel.moreira@ufrpe.br)
-- [José Fernando de Oliveira Filho] (josefernando.oliveirafilho@ufrpe.br)
-- [José Francisco de Medeiros] (josefrancisco.medeiros@ufrpe.br)
+- [Gabriel Moreira de Lemos e Silva](gabriel.moreira@ufrpe.br)
+- [José Fernando de Oliveira Filho](josefernando.oliveirafilho@ufrpe.br)
+- [José Francisco de Medeiros](josefrancisco.medeiros@ufrpe.br)
 
 ## Execução local
 
