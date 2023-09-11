@@ -171,37 +171,47 @@ def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games):
             df_pc = carrega_df(game)
             df_pc['Time'] = pd.to_datetime(df_pc['Time'])
 
-            #unindo o df de playercount com o df filtrado
+            # Merge the player count data with the filtered data based on selected filters
             df_pc = pd.merge(df_pc, df, how='inner', left_on=df_pc.index, right_on='app_id_df2')
             df_pc.set_index('Time', inplace=True)
 
-            #computando as vendas estimadas
+            # Compute estimated sales
             df_pc['estimated_sales'] = estimate_sales(df_pc['release_date'], df_pc['Playercount'])
 
-            #computando a media de jogadores diarios com as vendas estimadas
-            df_daily = df_pc.resample('D').agg({'Playercount': 'mean', 'estimated_sales': 'mean'})
+            # Compute the average daily players with estimated sales
+            df_biyearly = df_pc.resample('6M').agg({'Playercount': 'mean', 'estimated_sales': 'mean'})
 
-            dfs.append(df_daily)
+            dfs.append(df_biyearly)
         except FileNotFoundError:
             pass
+
     if not dfs:
         st.write(f'''<p style='text-align: center'>
                 Sem dados para exibir.</p>
                 ''', unsafe_allow_html=True)
         st.stop()
-    playercount_df = pd.concat(dfs)
     
-    plt.style.use('dark_background')
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-    ax1.plot(playercount_df.index, playercount_df['estimated_sales'], color='tab:blue')
-    ax1.set_ylabel('Vendas estimadas', color='tab:blue')
+    playercount_df = pd.concat(dfs)
 
-    ax2 = ax1.twinx()
-    ax2.plot(playercount_df.index, playercount_df['Playercount'], color='tab:red')
-    ax2.set_ylabel('Quantidade de jogadores', color='tab:red')
+    # Create a Plotly bar chart for player count
+    fig1 = px.bar(playercount_df, x=playercount_df.index, y='Playercount',
+                  labels={'Playercount': 'Quantidade de jogadores'},
+                  title='Evolução da Contagem de Jogadores ao Longo do Tempo (A cada 6 meses)')
 
-    plt.title('Média de vendas e contagem de jogadores ao longo do tempo')
-    st.pyplot(fig)
+    fig1.update_xaxes(title='Data')
+    fig1.update_yaxes(title='Quantidade de jogadores')
+
+    # Create a Plotly bar chart for estimated sales
+    fig2 = px.bar(playercount_df, x=playercount_df.index, y='estimated_sales',
+                  labels={'estimated_sales': 'Vendas estimadas'},
+                  title='Evolução de Vendas Estimadas ao Longo do Tempo (A cada 6 meses)')
+
+    fig2.update_xaxes(title='Data')
+    fig2.update_yaxes(title='Vendas estimadas')
+
+    # Display the two charts side by side
+    st.plotly_chart(fig1)
+    st.plotly_chart(fig2)
     pass
 
 def main():
