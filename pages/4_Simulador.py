@@ -106,11 +106,10 @@ def build_body():
 def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambiarra):
     #extrai os app_ids dos jogos baseados nos critérios de seleção
     selected_games = filtered_data['app_id_df2'].unique()
-
-    #filtra os dados para selecionar apenas as reviews dos jogos selecionados
-    filtered_reviews = df_reviews[df_reviews["app_id"].isin(selected_games)]
     
     try:
+        #filtra os dados para selecionar apenas as reviews dos jogos selecionados
+        filtered_reviews = classificadores.naive(df_reviews[df_reviews["app_id"].isin(selected_games)])[6]
         #separando reviews positivas das negativas
         positive_reviews = filtered_reviews[filtered_reviews["sentiment"]==1]
         negative_reviews = filtered_reviews[filtered_reviews["sentiment"]==0]
