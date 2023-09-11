@@ -17,7 +17,7 @@ def build_header():
              ''', unsafe_allow_html=True)
     
     st.write(f'''<p style='text-align: center'>
-            <br>Visão geral dos conjuntos de dados, estatísticas gerais dos conjuntos de dados, e avaliação do método de vendas dos jogos nos conjuntos de dados a partir de 3 conjuntos de dados complementares interligados.<br></p>
+            <br>Explore uma visão abrangente dos conjuntos de dados, incluindo estatísticas gerais e uma avaliação do desempenho de vendas de jogos, com insights provenientes dos três conjuntos de dados.<br></p>
             ''', unsafe_allow_html=True)
     st.markdown("---")
 
@@ -67,7 +67,7 @@ def tabela_dataframe_1():
                  <br>A tabela abaixo apresenta palavras-chave extraídas dos corpo das avaliações dos jogos, assim como o estado da avaliação em si (positiva ou negativa), e o indicador de avaliação recomendada por terceiros. Dados provenientes do primeiro dataframe.<br><br></p>
                  ''', unsafe_allow_html=True)
 
-    empty1, coluna1_df1, coluna2_df1, empty2 = st.columns([1,2,6,1], gap="medium")
+    empty1, coluna1_df1, coluna2_df1, empty2 = st.columns([1,2,5,1], gap="medium")
 
     with empty1:
         pass
@@ -84,9 +84,11 @@ def tabela_dataframe_1():
         pega_id_do_jogo_procurado = chama_id_name_df2[chama_id_name_df2['app_name_df2'] == selectbox_jogo_em_app_name_df2]['app_id_df2'].iloc[0]
 
         chama_df1 = carrega_df('df1')
-        # Encontra todas as linhas de chama_df1 com o mesmo valor de id encontrado acima
-        pega_reviews = chama_df1.loc[chama_df1['app_id'] == pega_id_do_jogo_procurado]
-        # Renomeia a coluna, precisou do inplace=True para aplicar a renoeação diretamente no df a menos que seja feita uma nova variavel para tal
+        # Encontra todas as linhas de chama_df1 com o mesmo valor de id de jogo que foi encontrado acima na variável "pega_id_do_jogo_procurado".
+        pega_reviews_inicial = chama_df1.loc[chama_df1['app_id'] == pega_id_do_jogo_procurado]
+
+        pega_reviews = pega_reviews_inicial.copy()
+        # Tratamento dos nomes das colunas para PTBR
         pega_reviews.rename(columns = {'review_text': 'Avaliações', 'review_score': 'Avaliação do jogo', 
                                        'review_votes': 'Avaliação recomendada'}, inplace=True)
         del pega_reviews['app_id']
@@ -280,7 +282,6 @@ def build_metodo_vendas():
     
     with empty2:
         st.empty()
-
 
 build_header()
 build_dataframes()
