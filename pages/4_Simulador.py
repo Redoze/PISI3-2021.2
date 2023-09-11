@@ -4,6 +4,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from wordcloud import WordCloud
 import plotly.graph_objects as go
 from funcs import *
+import classificadores
 import matplotlib.pyplot as plt
 from glob import glob
 
