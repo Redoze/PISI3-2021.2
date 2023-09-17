@@ -55,7 +55,7 @@ def naive(df_filtered):
     mean_accuracy = np.mean(scores)
     std_deviation = scores.std()
 
-    return (accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+    return(accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
 
 def k_nearest(df_filtered):
 
@@ -97,7 +97,7 @@ def k_nearest(df_filtered):
     mean_cv_accuracy = np.mean(cv_scores)
     std_cv_accuracy = np.std(cv_scores)
 
-    return (accuracy, recall, precision, f1, mean_cv_accuracy, std_cv_accuracy, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+    return(accuracy, recall, precision, f1, mean_cv_accuracy, std_cv_accuracy, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
 
 def support_vector(df_filtered):
 
@@ -150,7 +150,7 @@ def support_vector(df_filtered):
     mean_accuracy = np.mean(scores)
     std_deviation = scores.std()
 
-    return (accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+    return(accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
 
 def regressao_logistica(df_filtered):
 
@@ -191,4 +191,41 @@ def regressao_logistica(df_filtered):
     mean_accuracy = np.mean(scores)
     std_deviation = scores.std()
     
-    return (accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+    return(accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+
+def xgboost(df_filtered):
+    
+    # Dividindo os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"], test_size=0.2, random_state=42)
+
+    # Vetorização dos textos usando TF-IDF
+    tfidf_vectorizer = TfidfVectorizer(max_features=1000)
+    X_train_tfidf = tfidf_vectorizer.fit_transform(X_train)
+    X_test_tfidf = tfidf_vectorizer.transform(X_test)
+
+    # Classificador do XGBoost
+    xgb_classifier = xgb.XGBClassifier()
+
+    # Criação e treinamento do modelo XGBoost
+    xgb_classifier.fit(X_train_tfidf, y_train)
+
+    # Fazendo previsões usando o modelo treinado
+    predictions = xgb_classifier.predict(X_test_tfidf)
+
+    # Criando um DataFrame para armazenar as previsões
+    df_predicted = df_filtered.loc[y_test.index].copy()
+    df_predicted['predicted_sentiment'] = predictions
+    matriz_confusao_y_test = y_test
+    matriz_confusao_y_pred = predictions
+
+    # Avaliando o modelo
+    accuracy = accuracy_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
+    precision = precision_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+    scores = cross_val_score(xgb_classifier, X=X_train_tfidf, y=y_train, cv=5)
+    mean_accuracy = np.mean(scores)
+    std_deviation = scores.std()
+    
+    
+    return(accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred) 
