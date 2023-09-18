@@ -54,7 +54,7 @@ def build_body():
     results_df = pd.DataFrame(columns=["Model", "Accuracy", "Recall", "Precision", "F1 Score", "Cross Validation", "Standard Deviation"])
  
     # Loop through each model and calculate metrics
-    model_functions = [classificadores.naive, classificadores.k_nearest, classificadores.support_vector, classificadores.regressao_logistica]  # Replace with your actual model functions
+    model_functions = [classificadores.naive, classificadores.k_nearest, classificadores.support_vector, classificadores.regressao_logistica, classificadores.xgboost]
     # Randomly select app_names based on user-defined count
     random_app_names = random.sample(df["app_name"].tolist(), num_app_names)
     
@@ -101,7 +101,8 @@ def build_body():
     mapeamento_nomes = {'Model: naive': 'Naive Bayes',
                 'Model: k_nearest': 'k-Nearest Neighbor',
                 'Model: support_vector': 'Support Vector Machine',
-                'Model: regressao_logistica': 'Regressão Logística'}
+                'Model: regressao_logistica': 'Regressão Logística',
+                'Model: xgboost': 'XGBoost'}
 
     melted_results['Model'] = melted_results['Model'].replace(mapeamento_nomes)
     
