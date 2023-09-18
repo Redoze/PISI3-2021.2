@@ -14,6 +14,7 @@ from sklearn.metrics import precision_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils import compute_class_weight
 from sklearn.neighbors import KNeighborsClassifier
+import xgboost as xgb
 
 def naive(df_filtered):
 
