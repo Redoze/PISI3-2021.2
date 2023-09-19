@@ -35,7 +35,7 @@ def build_body():
     results_df = pd.DataFrame(columns=["Model", "Accuracy", "Recall", "Precision", "F1 Score", "Cross Validation", "Standard Deviation"])
  
     # Loop through each model and calculate metrics
-    model_functions = [classificadores.naive, classificadores.k_nearest, classificadores.support_vector, classificadores.regressao_logistica, classificadores.xgboost, classificadores.rede_neural]
+    model_functions = [classificadores.naive, classificadores.k_nearest, classificadores.support_vector, classificadores.regressao_logistica, classificadores.xgboost, classificadores.redes_neurais]
     # Randomly select app_names based on user-defined count
     random_app_names = random.sample(df["app_name"].tolist(), 2)
     
