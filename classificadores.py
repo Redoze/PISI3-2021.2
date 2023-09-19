@@ -1,21 +1,21 @@
 import pandas as pd
 import numpy as np
 from funcs import *
-from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import cross_val_score
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics import accuracy_score
 from collections import Counter
 from sklearn.svm import SVC
-from sklearn.metrics import recall_score
-from sklearn.metrics import precision_score, f1_score
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils import compute_class_weight
 from sklearn.neighbors import KNeighborsClassifier
 import xgboost as xgb
 
+
+
+# from sklearn.neural_network import MLPClassifier
 def naive(df_filtered):
 
     # Define os inputs e outputs para os modelos de teste e de treino
@@ -230,3 +230,49 @@ def xgboost(df_filtered):
     
     
     return(accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred) 
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_score
+from sklearn.neural_network import MLPClassifier
+import numpy as np
+from collections import Counter
+
+def rede_neural(df_filtered):
+    # Dividindo os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"], test_size=0.2, random_state=42)
+
+    # Convertendo as palavras em recursos numéricos (vetores TF-IDF)
+    vectorizer = TfidfVectorizer(max_features=100)
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+
+    # Configuração da rede neural (MLP)
+    model = MLPClassifier(hidden_layer_sizes=(64, 32), activation='relu', solver='adam', max_iter=5, random_state=42)
+
+    # Treinando a rede neural
+    model.fit(X_train_tfidf, y_train)
+
+    # Fazendo previsões
+    predictions = model.predict(X_test_tfidf)
+
+    matriz_confusao_y_test = y_test
+    matriz_confusao_y_pred = predictions
+
+    # Adicionando as previsões ao DataFrame
+    df_predicted = df_filtered.loc[y_test.index].copy()
+    df_predicted['predicted_sentiment'] = predictions
+
+    # Avaliando o desempenho do modelo
+    accuracy = accuracy_score(y_test, predictions)
+    recall = recall_score(y_test, predictions, average='weighted')
+    precision = precision_score(y_test, predictions, average='weighted')
+    f1 = f1_score(y_test, predictions, average='weighted')
+
+    # Calculando a acurácia média usando cross-validation
+    cv_scores = cross_val_score(model, X_train_tfidf, y_train, cv=5)
+    mean_accuracy = np.mean(cv_scores)
+    std_deviation = np.std(cv_scores)
+
+    return (accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+

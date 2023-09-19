@@ -17,33 +17,14 @@ def build_header():
              ''', unsafe_allow_html=True)
     
     st.write(f'''<p style='text-align: center'>
-            Esta página apresenta o resultado final da análise de sentimento, utilizando uma abordagem de comparação entre os quatro modelos \
+            <br>Esta página apresenta o resultado final da análise de sentimento, utilizando uma abordagem de comparação entre os quatro modelos \
              de classificação utilizados. Aqui, você encontrará uma análise detalhada do desempenho de cada modelo, \
-             destacando aqueles que obtiveram os melhores resultados.<br><br></p>
+             destacando aqueles que obtiveram os melhores resultados.<br></p>
             ''', unsafe_allow_html=True)
     
     st.markdown("---")
-
-    st.write(f'''<h2 style='text-align: center'>
-            Comparação entre os modelos de classificação<br><br></h2>
-            ''', unsafe_allow_html=True)
  
 def build_body():
-
-    st.write(f'''<p style='text-align: center'>
-            Escolha um número de jogos para validação</p>
-            ''', unsafe_allow_html=True)
-    
-    vazio1, col1, vazio2 = st.columns([1,3,1])
-    with vazio1:
-        pass
-
-    with col1:
-        # Get user-defined number of app_names
-        num_app_names = st.slider(label = "teste", min_value=2, step=1, max_value = 10, label_visibility = 'hidden', help = "Quantos mais jogos adicionados, mais demorado será o cálculo para os resultados.")
-    
-    with vazio2:
-        pass
  
     # Load the DataFrame using the custom function
     df = carrega_df("df1")
@@ -54,15 +35,14 @@ def build_body():
     results_df = pd.DataFrame(columns=["Model", "Accuracy", "Recall", "Precision", "F1 Score", "Cross Validation", "Standard Deviation"])
  
     # Loop through each model and calculate metrics
-    model_functions = [classificadores.naive, classificadores.k_nearest, classificadores.support_vector, classificadores.regressao_logistica, classificadores.xgboost]
+    model_functions = [classificadores.naive, classificadores.k_nearest, classificadores.support_vector, classificadores.regressao_logistica, classificadores.xgboost, classificadores.rede_neural]
     # Randomly select app_names based on user-defined count
-    random_app_names = random.sample(df["app_name"].tolist(), num_app_names)
+    random_app_names = random.sample(df["app_name"].tolist(), 2)
     
     for i, model_func in enumerate(model_functions):
 
         model_name = f"Model: {model_func.__name__}"
         # st.subheader(f"Results for {model_name}")
- 
         # Initialize a dictionary to store model metrics for this model
         model_metrics = {"Model": model_name}
         
@@ -84,12 +64,6 @@ def build_body():
             
         # Add the metrics to the results DataFrame
         results.append(model_metrics)
-
-    # def extract_values(row):
-    #     if isinstance(row, list):
-    #         if len(row) == 3 and isinstance(row[2], dict):
-    #             return row[0], row[1], row[2]["Accuracy"], row[2]["Recall"], row[2]["Precision"], row[2]["F1 Score"], row[2]["Cross Validation"], row[2]["Standard Deviation"]
-    #     return None, None, None, None, None
         
     # Create a DataFrame from the results list
     results_df = pd.DataFrame(results)
@@ -102,7 +76,8 @@ def build_body():
                 'Model: k_nearest': 'k-Nearest Neighbor',
                 'Model: support_vector': 'Support Vector Machine',
                 'Model: regressao_logistica': 'Regressão Logística',
-                'Model: xgboost': 'XGBoost'}
+                'Model: xgboost': 'XGBoost',
+                'Model: rede_neural': 'Redes Neurais'}
 
     melted_results['Model'] = melted_results['Model'].replace(mapeamento_nomes)
     
@@ -139,11 +114,15 @@ def build_body():
     melted_results.rename(columns={'Model': 'Modelo', 'Game': 'Jogo'}, inplace=True)
 
     st.write(f'''<h2 style='text-align: center'>
-             Resultados da comparação<br><br></h2>
+            Comparação entre os modelos de classificação<br><br></h2>
             ''', unsafe_allow_html=True)
 
     st.dataframe(melted_results, hide_index=True)
     st.write("")
+
+    st.write(f'''<h2 style='text-align: center'>
+            Melhores resultados<br><br></h2>
+            ''', unsafe_allow_html=True)
 
     col1, col2 = st.columns(2)
 
@@ -173,5 +152,21 @@ def build_body():
             Com um f1-score de:\n{best_f1_score_value:.4f}</p>
             ''', unsafe_allow_html=True)
     
+    st.write(f'''<p style='text-align: center'>
+            <br><br>Atualize a página para gerar um novo resultado com outros jogos</p>
+            ''', unsafe_allow_html=True)
+
+    empty1, col, empty2 = st.columns([2,2,1])
+
+    with empty1:
+        pass
+
+    with col:
+        if st.button("Atualizar Página", help = 'Gerar um novo resultado'):
+            st.experimental_rerun()
+    
+    with empty2:
+        pass
+        
 build_header()
 build_body()

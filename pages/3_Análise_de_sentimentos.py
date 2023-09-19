@@ -40,7 +40,8 @@ def build_body():
                      "k-Nearest Neighbor": ('k_nearest', "O classificador k-Nearest Neighbors (k-NN) classifica um ponto de dados com base na maioria das classes de seus k vizinhos mais próximos em um espaço de recursos. Ele não faz suposições sobre a distribuição dos dados, embora possa ser sensível à escala. Nesta análise, os recursos estão limitados em 100 e o valor k de vizinhos próximos é definido como 3."),
                      "Support Vector Machine": ('support_vector', "O Support Vector Machine (SVM) é um classificador que procura encontrar um hiperplano de separação entre diferentes classes, maximizando a margem entre os pontos de dados e o hiperplano. Nesta análise, o kernel linear é usado."), 
                      "Regressão Logística": ('regressao_logistica', "A regressão logística é um algoritmo de classificação que utiliza a função logística para modelar a probabilidade de um evento ocorrer. Neste exemplo, estamos usando a regressão logística para análise de sentimentos."),
-                     "XGBoost": ('xgboost', "O XGBoost (Extreme Gradient Boosting) é um poderoso algoritmo de aprendizado por ensemble que pode ser utilizado em uma ampla variedade de tarefas de classificação, incluindo análise de sentimentos.")}
+                     "XGBoost": ('xgboost', "O XGBoost (Extreme Gradient Boosting) é um poderoso algoritmo de aprendizado por ensemble que pode ser utilizado em uma ampla variedade de tarefas de classificação, incluindo análise de sentimentos."),
+                     "rede_neural": ('Redes Neurais', 'PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER')}
 
     df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
@@ -169,23 +170,23 @@ def informacoes_classificador(acuracia, recall, precisao, f1, acuracia_crossvali
     col1, col2 = st.columns([2,2], gap="small")
 
     with col1:
-        st.write(f'''<p>Acurácia: {acuracia:.2f}</p>
+        st.write(f'''<p>Acurácia: {acuracia:.4f}</p>
                 ''', unsafe_allow_html=True)
         
-        st.write(f'''<p>Recall: {recall:.2f}</p>
+        st.write(f'''<p>Recall: {recall:.4f}</p>
                 ''', unsafe_allow_html=True)
         
-        st.write(f'''<p>Precisão: {precisao:.2f}</p>
+        st.write(f'''<p>Precisão: {precisao:.4f}</p>
                 ''', unsafe_allow_html=True)
         
     with col2:
-        st.write(f'''<p>F1-Score: {f1:.2f}</p>
+        st.write(f'''<p>F1-Score: {f1:.4f}</p>
                 ''', unsafe_allow_html=True)
         
-        st.write(f'''<p>Acurácia média utilizando cross-validation: {acuracia_crossvalidation:.2f}</p>
+        st.write(f'''<p>Acurácia média utilizando cross-validation: {acuracia_crossvalidation:.4f}</p>
                 ''', unsafe_allow_html=True)
         
-        st.write(f'''<p>Desvio padrão de: {desvio_padrao:.2f}</p>
+        st.write(f'''<p>Desvio padrão de: {desvio_padrao:.4f}</p>
                 ''', unsafe_allow_html=True)
     
     st.text("")
