@@ -61,13 +61,30 @@ def build_body():
 
         for funcoes in func_names:
             chama_funcao = globals()[func_names[func_names.index(funcoes)]]
-            chama_funcao(filtered_data, df_reviews, selected_games2)
+            chama_funcao(filtered_data, df_reviews, selected_games2, modelos, seletor_modelo)
 
     #chamando o modelo de machine learning e a word cloud
     #keyword_extraction_and_word_cloud(filtered_data)
     #player_count_and_units_sold_graph(filtered_data)
 
     ############################################################ - ############################################################
+    modelos = {'Naive Bayes': 'naive',
+            'k-Nearest Neighbor': 'k_nearest',
+            'Support Vector Machine': 'support_vector',
+            'Regressão Logística': 'regressao_logistica',
+            'XGBoost': 'xgboost',
+            'Redes Neurais': 'redes_neurais',
+            'Random Forest': 'random_forest'}
+    
+    vazio_1, coluna, vazio_2 = st.columns([2,3,2])
+    with vazio_1:
+        pass
+
+    with coluna:
+        seletor_modelo = st.selectbox('Selecione o modelo que deseja usar no simulador', list(modelos.keys()))
+
+    with vazio_2:
+        pass
 
     vazio_1, coluna_1, coluna_2, vazio_2 = st.columns([1,5,5,1])
 
@@ -114,13 +131,17 @@ def build_body():
     with vazio_2_1v_3:
         st.empty()   
 
-def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambiarra):
+def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambiarra, modelos, seletor_modelo):
     #extrai os app_ids dos jogos baseados nos critérios de seleção
     selected_games = filtered_data['app_id_df2'].unique()
     
     try:
+        # Mapeia o nome do modelo selecionado para a função correspondente em classificadores
+        funcao_modelo_selecionado = getattr(classificadores, modelos[seletor_modelo])
+
         #filtra os dados para selecionar apenas as reviews dos jogos selecionados
-        filtered_reviews = classificadores.naive(df_reviews[df_reviews["app_id"].isin(selected_games)])[6]
+        filtered_reviews = funcao_modelo_selecionado(df_reviews[df_reviews["app_id"].isin(selected_games)])[6]
+
         #separando reviews positivas das negativas
         positive_reviews = filtered_reviews[filtered_reviews["sentiment"]==1]
         negative_reviews = filtered_reviews[filtered_reviews["sentiment"]==0]
@@ -164,7 +185,7 @@ def keyword_extraction_and_word_cloud(filtered_data, df_reviews, variavel_gambia
                 ''', unsafe_allow_html=True)
     pass
 
-def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games):
+def player_count_and_units_sold_graph(df, variavel_gambiarra2, selected_games, modelos, seletor_modelo):
     dfs = []
     for game in selected_games:
         try:
