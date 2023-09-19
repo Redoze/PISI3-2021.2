@@ -41,7 +41,7 @@ def build_body():
                      "Support Vector Machine": ('support_vector', "O Support Vector Machine (SVM) é um classificador que procura encontrar um hiperplano de separação entre diferentes classes, maximizando a margem entre os pontos de dados e o hiperplano. Nesta análise, o kernel linear é usado."), 
                      "Regressão Logística": ('regressao_logistica', "A regressão logística é um algoritmo de classificação que utiliza a função logística para modelar a probabilidade de um evento ocorrer. Neste exemplo, estamos usando a regressão logística para análise de sentimentos."),
                      "XGBoost": ('xgboost', "O XGBoost (Extreme Gradient Boosting) é um poderoso algoritmo de aprendizado por ensemble que pode ser utilizado em uma ampla variedade de tarefas de classificação, incluindo análise de sentimentos."),
-                     "rede_neural": ('Redes Neurais', 'PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER')}
+                     "Redes Neurais": ('redes_neurais', 'PLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDERPLACEHOLDER')}
 
     df["sentiment"] = df["review_score"].apply(lambda x: 1 if x == 1 else 0)
 
@@ -237,7 +237,7 @@ def grafico_nuvem_de_palavras_negativa_positiva(df):
                 Nuvem de palavras de avaliações positivas<br><br></h3>
                 ''', unsafe_allow_html=True)
         st.write(f'''<p style='text-align: center'>
-                Nenhuma review positiva encontrada para este jogo.<br></p>
+                Nenhuma avaliação positiva encontrada para este jogo.<br></p>
                 ''', unsafe_allow_html=True)
         st.write("")
     
@@ -253,7 +253,7 @@ def grafico_nuvem_de_palavras_negativa_positiva(df):
                 Nuvem de palavras de avaliações negativas<br><br></h3>
                 ''', unsafe_allow_html=True)
         st.write(f'''<p style='text-align: center'>
-                Nenhuma review negativa encontrada para este jogo.<br></p>
+                Nenhuma avaliação negativa encontrada para este jogo.<br></p>
                 ''', unsafe_allow_html=True)
         st.write("")
 
