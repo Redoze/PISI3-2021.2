@@ -6,15 +6,15 @@ Repositório destinado para a disciplina Projeto Interdisciplinar para Sistemas 
 
 Este projeto consiste em um aplicativo que realiza análise de sentimentos em avaliações de jogos da plataforma Steam. Utilizando a interface web do Streamlit, ele permite a análise e visualização das percepções dos usuários sobre os jogos com base em suas avaliações.
 
-Documento: [PISI3 - Artigo](https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4)
+Artigo: [Link](https://docs.google.com/document/d/151L1pRvdYTNYcvONrVlpuCh6-HuasvvWEu3KfF5aM-4)
 
 ## Grupo GJJ
 
-Equipe:
+Membros:
 
-- Gabriel Moreira de Lemos e Silva (gabriel.moreira@ufrpe.br)
-- José Fernando de Oliveira Filho (josefernando.oliveirafilho@ufrpe.br)
-- José Francisco de Medeiros (josefrancisco.medeiros@ufrpe.br)
+- Gabriel Moreira de Lemos e Silva - (gabriel.moreira@ufrpe.br)
+- José Fernando de Oliveira Filho - (josefernando.oliveirafilho@ufrpe.br)
+- José Francisco de Medeiros - (josefrancisco.medeiros@ufrpe.br)
 
 ## Execução local
 

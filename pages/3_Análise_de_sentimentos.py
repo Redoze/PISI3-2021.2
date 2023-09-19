@@ -48,7 +48,7 @@ def build_body():
         "XGBoost": ('xgboost',
                     "O XGBoost (Extreme Gradient Boosting) é um poderoso algoritmo de aprendizado por ensemble que pode ser utilizado em uma ampla variedade de tarefas de classificação, incluindo análise de sentimentos."),
         "Redes Neurais": ('redes_neurais',
-                          "Redes neurais são modelos de aprendizado profundo que podem aprender representações complexas de dados. Neste exemplo, usamos uma rede neural para análise de sentimentos."),
+                          "O classificador de redes neurais é uma poderosa abordagem de aprendizado de máquina que simula o funcionamento do cérebro humano para resolver problemas complexos. Ele consiste em camadas de neurônios artificiais que processam dados, identificam padrões e fazem previsões."),
         "Random Forest": ('random_forest',
                           "O modelo Random Forest é um algoritmo de aprendizado por ensemble que utiliza múltiplas árvores de decisão para realizar a classificação. É eficaz em uma variedade de tarefas de classificação e pode ser uma escolha sólida para análise de sentimentos.")
     }
@@ -273,4 +273,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
