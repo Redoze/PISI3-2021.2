@@ -83,7 +83,7 @@ def build_body():
         'Model: regressao_logistica': 'Regressão Logística',
         'Model: xgboost': 'XGBoost',
         'Model: redes_neurais': 'Redes Neurais',
-        'Model:random_forest': 'Random Forest'
+        'Model: random_forest': 'Random Forest'
     }
 
     melted_results['Model'] = melted_results['Model'].replace(mapeamento_nomes)
