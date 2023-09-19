@@ -13,6 +13,7 @@ from sklearn.utils import compute_class_weight
 from sklearn.neighbors import KNeighborsClassifier
 import xgboost as xgb
 from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
 
 def naive(df_filtered):
 
@@ -266,3 +267,43 @@ def redes_neurais(df_filtered):
     std_deviation = np.std(cv_scores)
 
     return (accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+
+
+def random_forest(df_filtered):
+
+    # Divida os dados em conjuntos de treinamento e teste
+    X_train, X_test, y_train, y_test = train_test_split(df_filtered["review_text"], df_filtered["sentiment"],
+                                                        test_size=0.2, random_state=42)
+
+    # Vetorização dos textos usando TF-IDF
+    vectorizer = TfidfVectorizer(max_features=1000)
+    X_train_tfidf = vectorizer.fit_transform(X_train)
+    X_test_tfidf = vectorizer.transform(X_test)
+
+    # Crie e treine o modelo Random Forest
+    clf = RandomForestClassifier(random_state=42, n_estimators=50)  # Você pode ajustar os hiperparâmetros conforme necessário
+    clf.fit(X_train_tfidf, y_train)
+
+    # Faça previsões usando o modelo treinado
+    predictions = clf.predict(X_test_tfidf)
+
+    # Crie um DataFrame para armazenar as previsões
+    df_predicted = df_filtered.loc[y_test.index].copy()
+    df_predicted['predicted_sentiment'] = predictions
+
+    matriz_confusao_y_test = y_test
+    matriz_confusao_y_pred = predictions
+
+    # Cálculo de métricas de avaliação
+    accuracy = accuracy_score(y_test, predictions)
+    recall = recall_score(y_test, predictions)
+    precision = precision_score(y_test, predictions)
+    f1 = f1_score(y_test, predictions)
+
+    # Acurácia média do modelo usando cross-validation
+    scores = cross_val_score(clf, X=X_train_tfidf, y=y_train, cv=5)
+    mean_accuracy = np.mean(scores)
+    std_deviation = scores.std()
+
+    return (accuracy, recall, precision, f1, mean_accuracy, std_deviation, df_predicted, matriz_confusao_y_test, matriz_confusao_y_pred)
+
